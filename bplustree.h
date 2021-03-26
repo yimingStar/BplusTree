@@ -11,7 +11,7 @@ class bPlusTree {
   /**
    * project description functions
    */
-  bPlusTree(int degree);
+  bPlusTree(int n);
   void insertion();
   void deletion();
   void search(int arr[]);

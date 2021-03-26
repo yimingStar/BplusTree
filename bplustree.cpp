@@ -1,5 +1,5 @@
-#include <bplustree.h>
-bPlusTree::bPlusTree(int degree): bPlusTree(degree) {} 
+#include "bplustree.h"
+bPlusTree::bPlusTree(int n): degree(n) {} 
 int bPlusTree::getTreeDegree() {
  return degree;
-} 
+}
