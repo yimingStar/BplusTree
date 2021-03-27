@@ -1,6 +1,6 @@
 #include<list>
 #include<vector>
-#include<map>
+#include<utility>
 #include<stack>
 
 // <PROJECT>_<PATH>_<FILE>_H_.
@@ -15,10 +15,17 @@ class treeNode {
      * Which will be the maximum key pairs in one node. 
     */
     bool isLeaf;  
-    std::map<int,double> keyPairs; 
+    std::vector<std::pair<int,double>> keyPairs;
+    std::vector<treeNode*> childPointers;
   public:
     treeNode(int key); // create index node
     treeNode(int key, double value); // create leaf node
+
+    treeNode* searchIndexNode(int);
+    double searchLeafNode(int key);
+
+    int insert(treeNode* target, std::pair<int,double>); // insert new key-value into 'index' or 'leaf' node
+    
     int getNodeNumOfPairs();
     int getIsLeaf();
 };
@@ -27,8 +34,8 @@ class bPlusTree {
   private: 
     int degree;
     treeNode *root;
-    std::stack<treeNode> tracepath;
-    std::list<treeNode> leafs;
+    std::vector<treeNode*> tracePath;
+    std::list<treeNode*> leafList;
   public:
   /**
    * project description functions
@@ -36,8 +43,9 @@ class bPlusTree {
   bPlusTree(int m);
   int insertion(int key, double value);
   int deletion(int key);
-  int search(int arr[]);
 
+  double search(int);
+  treeNode* searchLeaf(int);
   /**
    * test functions
    */
