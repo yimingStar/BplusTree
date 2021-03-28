@@ -14,14 +14,12 @@ const string nullStr = "Null";
 treeNode::treeNode(bool isLeaf, int treeDegree) {
   isLeaf = isLeaf;
   degree = treeDegree;
-  maxPairSize = treeDegree - 1;
 }
 
 treeNode::treeNode(int treeDegree, int key) {
   // add new key-value pairs into leaf node
   isLeaf = false;
   degree = treeDegree;
-  maxPairSize = treeDegree - 1;
   keyPairs.insert({key, 0}); // set value = 0 for INDEX node. 
 }
 
@@ -35,7 +33,6 @@ treeNode::treeNode(int treeDegree, int key, double value) {
   // add new key-value pairs into leaf node
   isLeaf = true;
   degree = treeDegree;
-  maxPairSize = treeDegree - 1;
   keyPairs.insert({key, value});
 }
 
@@ -81,7 +78,7 @@ pair<bool, double> treeNode::searchLeafNode(int key) {
  */
 pair<bool, int> treeNode::insertIndexNode(treeNode* targetNode, pair<int, double> insertPair) {
   // check key size
-  if(targetNode->keyPairs.size() == maxPairSize) {
+  if(targetNode->keyPairs.size() == degree-1) {
     // OVERFULL
     cout << "[treeNode::insert] target insertion INSERT node is OVERFULL";
 
@@ -93,39 +90,50 @@ pair<bool, int> treeNode::insertIndexNode(treeNode* targetNode, pair<int, double
   return {false, 0};
 }
 
+/**
+ * @brief 
+ * 1. if not overfull, no split occurs -> insert data
+ * 2. if overfull, split occurs 
+ * 
+ * @param targetNode 
+ * @param insertPair 
+ * @param leafList 
+ * @return pair<bool, int> 
+ */
 pair<bool, int> treeNode::insertLeafNode(
   treeNode* targetNode, pair<int, double> insertPair, list<treeNode*>& leafList) {
-  // check keyPair size
-  if(targetNode->keyPairs.size() == maxPairSize) {
-    targetNode->keyPairs.insert(insertPair);
-    // OVERFULL
-    cout << "[treeNode::insertLeafNode] after insertion, LEAF node is OVERFULL" << endl;
-
-    int midkey = -INT_MAX;
-    map<int, double>::iterator midKey = targetNode->splitByMiddleKey();
-    cout << "[treeNode::insertLeafNode] split leaf node by key: " << midKey->first << endl;
-
-    /**
-     * @brief Create new leaf and insert into leafList
-     */
-    list<treeNode*>::iterator leafInsertPoint;
-    for(auto it=leafList.begin(); it!=leafList.end(); it++)  {
-      if(targetNode == *it) {
-        leafInsertPoint = it;
-        cout << "[treeNode::insertLeafNode] get LEAF node in LeafList" << endl;
-      }
-    }
-    treeNode *newLeaf = new treeNode(true, targetNode->degree);
-    leafList.insert(next(leafInsertPoint), newLeaf);
-    
-    copyAndDeleteKeys(newLeaf, midKey, keyPairs.end());
-    return {true, midkey};
+  
+  targetNode->keyPairs.insert(insertPair);
+  if(targetNode->keyPairs.size() < degree) {
+    return {false, 0};
   }
 
-  targetNode->keyPairs.insert(insertPair);
-  return {false, 0};
+  cout << "[treeNode::insertLeafNode] after insertion, LEAF node is OVERFULL" << endl;
+  /**
+   * @brief Create new leaf and insert into leafList
+   */
+  list<treeNode*>::iterator leafInsertPoint;
+  for(auto it=leafList.begin(); it!=leafList.end(); it++)  {
+    if(targetNode == *it) {
+      leafInsertPoint = it;
+      cout << "[treeNode::insertLeafNode] get LEAF node in LeafList" << endl;
+    }
+  }
+  treeNode *newLeaf = new treeNode(true, targetNode->degree);
+  leafList.insert(next(leafInsertPoint), newLeaf);
+  
+  int midkey = -INT_MAX;
+  map<int, double>::iterator midKey = targetNode->splitByMiddleKey();
+  cout << "[treeNode::insertLeafNode] SPLIT LEAF node by key: " << midKey->first << endl;
+  copyAndDeleteKeys(newLeaf, midKey, keyPairs.end());
+  return {true, midkey};
 }
 
+/**
+ * @brief get keyPairs middle iterator
+ * 
+ * @return map<int, double>::iterator 
+ */
 map<int, double>::iterator treeNode::splitByMiddleKey() {
   // create new node for the begin to middle keys
   int mid;
