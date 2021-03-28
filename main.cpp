@@ -8,6 +8,8 @@ using namespace std;
 */
 int main() {
   bPlusTree tree(3);
-  cout << tree.getTreeDegree() << endl;
+  tree.insertion(21, 0.3534);
+  tree.search(21);
+  tree.search(22);
   return 0;
 }

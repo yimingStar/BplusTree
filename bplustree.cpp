@@ -2,14 +2,20 @@
 #include <iostream>
 using namespace std;
 
+const string nullStr = "Null";
+
 /**
  * Build treeNode class
  * ====================
 */
-treeNode::treeNode(int key) {
+treeNode::treeNode(int treeDegree, int key) {
   // add new key-value pairs into leaf node
   isLeaf = false;
-  pair<int, double> newKeyValue = make_pair(key, NULL); // set value = NULL for index node.
+
+  degree = treeDegree;
+  maxPairSize = treeDegree - 1;
+
+  pair<int, double> newKeyValue = make_pair(key, 0); // set value = 0 for INDEX node.
   keyPairs.push_back(newKeyValue); 
 }
 
@@ -19,16 +25,20 @@ treeNode::treeNode(int key) {
  * @param key 
  * @param value 
  */
-treeNode::treeNode(int key, double value) {
+treeNode::treeNode(int treeDegree, int key, double value) {
   // add new key-value pairs into leaf node
   isLeaf = true;
+
+  degree = treeDegree;
+  maxPairSize = treeDegree - 1;
+
   pair<int, double> newKeyValue = make_pair(key, value);
   keyPairs.push_back(newKeyValue); 
 }
 
 treeNode* treeNode::searchIndexNode(int key) { 
   if(isLeaf) {
-    cout << "throw exception - leaf node calling search index function"  << endl;
+    cout << "throw exception - leaf node calling search INDEX function"  << endl;
     return NULL;
   }
   treeNode* targetChild;
@@ -43,25 +53,50 @@ treeNode* treeNode::searchIndexNode(int key) {
   return *childIdx;
 }
 
-double treeNode::searchLeafNode(int key) {
+
+pair<bool, double> treeNode::searchLeafNode(int key) {
   if(!isLeaf) {
-    cout << "throw exception - unleaf node calling search leaf function"  << endl;
-    return NULL;
+    cout << "throw exception - unleaf node calling search LEAF function"  << endl;
+    return make_pair(false, 0);
   }
-  double value = NULL;
+
   for (auto &p: keyPairs) {
     if(key == p.first) {
-      cout << "[treeNode::search] hit in leaf, key: " << key << endl;
-      value = p.second; 
-      break;
+      cout << "[treeNode::search] hit in LEAF, key: " << key << endl;
+      return make_pair(true, p.second);
     }
   }
-  return value;
+
+  return make_pair(false, 0);;
 }
 
-int treeNode::insert(treeNode* insertNode, pair<int, double> insertPair) {
-  // TODO
+int treeNode::insertLeafNode(treeNode* targetNode, pair<int, double> insertPair) {
+  // check keyPair size
+  if(targetNode->keyPairs.size() == maxPairSize) {
+    // over full
+    cout << "[treeNode::insert] target insertion LEAF node is overFull";
+    return 0;
+  }
+
+  int key = insertPair.first;
+  vector<pair<int, double>>::iterator insertPoint = targetNode->keyPairs.begin(); 
+  
+  for (auto &p: targetNode->keyPairs) {
+    if(p.first >= key) {
+      // find the key
+      break;
+    }
+    insertPoint++;
+  }
+
+  targetNode->keyPairs.insert(insertPoint, insertPair);
+  return 0;
 }
+
+bool treeNode::getIsLeaf() {
+  return isLeaf;
+}
+
 
 /**
  * Build bPlusTree class
@@ -100,11 +135,12 @@ int bPlusTree::insertion(int key, double value) {
     treeNode *targetLeaf = searchLeaf(key);
     if(targetLeaf == NULL) {
       // tree is empty
-      root = new treeNode(key, value);
+      root = new treeNode(degree, key, value);
       return 0;
     }
 
-    targetLeaf.
+    // search the leaf to insert
+    targetLeaf->insertLeafNode(targetLeaf, make_pair(key, value));
   }
   catch(exception& e) {
     cerr << "exception caught: " << e.what() << '\n';
@@ -124,20 +160,19 @@ int bPlusTree::deletion(int key) {
 
 /**
  * @brief Search target leaf node with integer, reuse in insert
- * 1. if node = leaf --> just try to find the value
- * 2. if node = index --> push node stack tracepath; 
+ * 1. if node = LEAF --> just try to find the value
+ * 2. if node = INDEX --> push node stack tracepath; 
  *    then goes to the correct children to keep on the traversal
  * @param int = key
  * @return treeNode = the target leaf node
  */
 treeNode* bPlusTree::searchLeaf(int key) {
-  cout << "[bPlusTree::search] search key: " << key << endl;
+  cout << "[bPlusTree::searchLeaf] key: " << key << endl;
   tracePath.clear();
   treeNode *targetNode = root;
   
   try {  
     while(targetNode != NULL) {
-      cout << targetNode->getIsLeaf() << endl;
       if(!targetNode->getIsLeaf()) {
         // indexNode
         // pick the correct child and keep the traversal
@@ -160,11 +195,20 @@ treeNode* bPlusTree::searchLeaf(int key) {
  * @brief Traverse to the target leaf where fits the key range
  * 
  * @param key 
- * @return double 
+ * @return int - {0} = success, {-1} = failed 
  */
-double bPlusTree::search(int key) {
+int bPlusTree::search(int key) {
+  cout << "[bPlusTree::search] key: " << key << endl;
   treeNode *targetLeaf = searchLeaf(key);
-  if(targetLeaf == NULL) return NULL;
-
-  return targetLeaf->searchLeafNode(key);
+  if(targetLeaf == NULL) return -1;
+  
+  pair<bool, double> result = targetLeaf->searchLeafNode(key);
+  cout << "[project_result][bPlusTree::search] key: " << key << ", result = ";
+  if(result.first) {
+    cout << result.second << endl;
+  }
+  else {
+    cout << nullStr << endl;
+  }
+  return 0;
 }
