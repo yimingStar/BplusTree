@@ -8,8 +8,23 @@ using namespace std;
 */
 int main() {
   bPlusTree tree(3);
-  tree.insertion(21, 0.3534);
-  tree.search(21);
+  tree.insertion(20, 2.0);
+  cout << endl;
+  tree.search(20);
+  cout << endl;
+
   tree.search(22);
+  cout << endl;
+  tree.insertion(22, 2.2);
+  cout << endl;
+  tree.search(22);
+  cout << endl;
+
+  tree.insertion(21, 2.1);
+  cout << endl;
+  tree.search(21);
+  cout << endl;
+  
+  tree.printLeafList();
   return 0;
 }

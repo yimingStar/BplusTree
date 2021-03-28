@@ -1,7 +1,7 @@
 #include<list>
 #include<vector>
+#include<map>
 #include<utility>
-#include<stack>
 
 // <PROJECT>_<PATH>_<FILE>_H_.
 #ifndef BPLUSTREE_H_
@@ -17,20 +17,32 @@ class treeNode {
     bool isLeaf;
     int degree;
     int maxPairSize;  
-    std::vector<std::pair<int,double>> keyPairs;
+    std::map<int,double> keyPairs;
     std::vector<treeNode*> childPointers;
   public:
+    
+    treeNode(bool isLeaf, int degree); // create node
     treeNode(int degree, int key); // create index node
     treeNode(int degree, int key, double value); // create leaf node
 
     treeNode* searchIndexNode(int key);
     std::pair<bool, double> searchLeafNode(int key);
 
-    int insertIndexNode(treeNode* target, std::pair<int,double>); // insert new key-value into 'index' node
-    int insertLeafNode(treeNode* target, std::pair<int,double>); // insert new key-value into 'leaf' node
+    std::pair<bool, int> insertIndexNode(treeNode* target, std::pair<int,double>); // insert new key-value into 'index' node
+    std::pair<bool, int> insertLeafNode(
+      treeNode* target, 
+      std::pair<int,double>,
+      std::list<treeNode*> &leafList
+    ); // insert new key-value into 'leaf' node
 
-    int getNodeNumOfPairs();
+    std::map<int, double>::iterator splitByMiddleKey();
+    int copyAndDeleteKeys(treeNode *newNode, std::map<int, double>::iterator start, std::map<int, double>::iterator end);
+    
+    // get variable functions
     bool getIsLeaf();
+    // debug functions
+    int getNodeNumOfPairs();
+    void printNodeKeyValue();
 };
 
 class bPlusTree {
@@ -54,6 +66,7 @@ class bPlusTree {
    */
   int getTreeDegree();
   void traversal(); 
+  void printLeafList();
 };
 
 #endif  // BPLUSTREE_H_
