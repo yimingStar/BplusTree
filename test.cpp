@@ -1,0 +1,53 @@
+#include <iostream>
+#include "bPlusTree.hpp"
+#include "test.hpp"
+
+using namespace std;
+
+void test::testInsertion(bPlusTree &T) {
+  T.insertion(10,0.1);
+  cout << endl;
+  T.insertion(30,0.3);
+  cout << endl;
+  T.insertion(20,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.insertion(40,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.insertion(50,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.insertion(60,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+  
+  T.insertion(70,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.insertion(31,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+  
+  T.insertion(32,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.insertion(33,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.printLeafList();
+}
