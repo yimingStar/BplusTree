@@ -22,8 +22,9 @@ class bPlusTree {
   int insertion(int key, double value);
   int deletion(int key);
 
-  int search(int);
-  treeNode* searchLeaf(int);
+  int search(int key);
+  int searchRange(int start, int finish);
+  treeNode* searchLeaf(int key);
   /**
    * test functions
    */

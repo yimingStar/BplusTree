@@ -1,6 +1,7 @@
 #include <iostream>
 #include <assert.h> 
 #include <limits.h>
+#include <iomanip>
 using namespace std;
 
 #include "bPlusTree.hpp"
@@ -125,7 +126,7 @@ treeNode* bPlusTree::searchLeaf(int key) {
   tracePath.clear();
   treeNode *targetNode = root;
   
-  try {  
+  try {
     while(targetNode != NULL) {
       if(!targetNode->getIsLeaf()) {
         // indexNode
@@ -154,16 +155,67 @@ treeNode* bPlusTree::searchLeaf(int key) {
 int bPlusTree::search(int key) {
   cout << "[bPlusTree::search] key: " << key << endl;
   treeNode *targetLeaf = searchLeaf(key);
-  if(targetLeaf == NULL) return -1;
+  if(targetLeaf == NULL) {
+    // the tree is empty
+    cout << nullStr << endl;
+    return -1;
+  }
   
   pair<bool, double> result = targetLeaf->searchLeafNode(key);
-  cout << "[project_result][bPlusTree::search] key: " << key << ", result = ";
+  cout << "[projectResult][bPlusTree::search] key: " << key << ", result = ";
   if(result.first) {
     cout << result.second << endl;
   }
   else {
     cout << nullStr << endl;
   }
+  return 0;
+}
+
+int bPlusTree::searchRange(int start, int finish) {
+  cout << "[bPlusTree::searchRange] start: " << start << ", finish: " << finish << endl;
+  treeNode *startLeaf = searchLeaf(start);
+  if(startLeaf == NULL) {
+    // the tree is empty
+    cout << nullStr << endl;
+    return -1;
+  }
+
+  vector<double> resultKeys;
+
+  bool isInRange = false;
+  bool stopSearching = false;
+  
+  for(auto itLeaf=leafList.begin(); itLeaf != leafList.end(); itLeaf++) {
+    if(*itLeaf == startLeaf || isInRange) {
+      // get starting leaf, or leaf is in range
+      isInRange = true;
+      for(auto itKey=(*itLeaf)->getKeyPairs().begin(); itKey != (*itLeaf)->getKeyPairs().end(); itKey++) {
+        if(itKey->first < start || itKey->first > finish) {
+          // Out of range
+          stopSearching = true;
+          break;
+        }
+        resultKeys.push_back(itKey->second);
+      }
+    }
+    if(stopSearching) break;
+  }
+
+  if(resultKeys.empty()) {
+    cout << nullStr << endl;
+    return 0;
+  }
+
+  cout << "[projectResult][bPlusTree::searchRange] ";
+  for(int i=0; i<resultKeys.size(); i++) {
+    cout << resultKeys[i];
+    if(i == resultKeys.size() - 1) {
+      break;
+    }
+    cout << ",";
+  }
+  cout << endl;
   return 0;
 }
 

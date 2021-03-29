@@ -4,50 +4,41 @@
 
 using namespace std;
 
-void test::testInsertion(bPlusTree &T) {
-  T.insertion(10,0.1);
+void test::testInsertion(bPlusTree &tree) {
+  tree.insertion(10,1.0);
   cout << endl;
-  T.insertion(30,0.3);
+  tree.insertion(30,3.0);
   cout << endl;
-  T.insertion(20,0.2);
-  cout << endl;
-  T.printTree(T.getRoot());
+  tree.insertion(20,2.0);
   cout << endl;
 
-  T.insertion(40,0.2);
-  cout << endl;
-  T.printTree(T.getRoot());
+  tree.insertion(40,4.0);
   cout << endl;
 
-  T.insertion(50,0.2);
-  cout << endl;
-  T.printTree(T.getRoot());
+  tree.insertion(50,5.0);
   cout << endl;
 
-  T.insertion(60,0.2);
-  cout << endl;
-  T.printTree(T.getRoot());
+  tree.insertion(60,6.0);
   cout << endl;
   
-  T.insertion(70,0.2);
-  cout << endl;
-  T.printTree(T.getRoot());
+  tree.insertion(70,7.0);
   cout << endl;
 
-  T.insertion(31,0.2);
-  cout << endl;
-  T.printTree(T.getRoot());
+  tree.insertion(31,3.1);
   cout << endl;
   
-  T.insertion(32,0.2);
-  cout << endl;
-  T.printTree(T.getRoot());
+  tree.insertion(32,3.2);
   cout << endl;
 
-  T.insertion(33,0.2);
+  tree.insertion(33,3.3);
   cout << endl;
-  T.printTree(T.getRoot());
+  tree.insertion(-10,-0.35837);
   cout << endl;
+  tree.printTree(tree.getRoot());
+  cout << endl;
+  tree.printLeafList();
+}
 
-  T.printLeafList();
+void test::testRangeSearch(bPlusTree &tree) {
+  tree.searchRange(-100, 50);
 }

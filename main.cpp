@@ -11,6 +11,7 @@ int main() {
   bPlusTree tree1(3);
   test doTest;
   doTest.testInsertion(tree1);
+  doTest.testRangeSearch(tree1);
 
   return 0;
 }

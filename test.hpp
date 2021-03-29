@@ -5,7 +5,7 @@
 class test {
   public:
     void testSearch(bPlusTree &tree);
-    void testRangeSearch(bPlusTree &tree);
+    void testRangeSearch(bPlusTree &T);
     void testInsertion(bPlusTree &tree);
     void testDeletetion(bPlusTree &tree);
 };
