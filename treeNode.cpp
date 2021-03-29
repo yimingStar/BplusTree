@@ -2,8 +2,8 @@
 #include <assert.h> 
 #include <limits.h>
 
-#include "treeNode.h"
-#include "constant.h"
+#include "treeNode.hpp"
+#include "constant.hpp"
 using namespace std;
 
 /**

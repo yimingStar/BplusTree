@@ -3,8 +3,8 @@
 #include <limits.h>
 using namespace std;
 
-#include "bplustree.h"
-#include "constant.h"
+#include "bPlusTree.hpp"
+#include "constant.hpp"
 /**
  * Build bPlusTree class
  * =====================
