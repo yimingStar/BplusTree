@@ -1,8 +1,9 @@
-#include "treeNode.h"
-
 #include <iostream>
 #include <assert.h> 
 #include <limits.h>
+
+#include "treeNode.h"
+#include "constant.h"
 using namespace std;
 
 /**
@@ -13,7 +14,7 @@ treeNode::treeNode(int treeDegree, int key, bool insert) {
   // add new key-value pairs into leaf node
   isLeaf = false;
   degree = treeDegree;
-  if(insert) keyPairs.insert({key, 0}); // set value = 0 for INDEX node. 
+  if(insert) keyPairs.insert({key, defaultIndexValue}); // set value = 0 for INDEX node. 
 }
 
 /**
@@ -76,11 +77,22 @@ pair<bool, double> treeNode::searchLeafNode(int key) {
 pair<int, treeNode*> treeNode::insertIndexNode(treeNode* targetNode, pair<int, double> insertPair) {
   targetNode->keyPairs.insert(insertPair);
   if(targetNode->keyPairs.size() < degree) {
-    return {false, 0};
+    return {false, NULL};
   }
-  cout << "[treeNode::insert] target insertion INSERT node is OVERFULL";
-  // push middle key to parent
-  return {true, 0};
+  cout << "[treeNode::insertIndexNode] target insertion INSERT node is OVERFULL" << endl;
+  
+  /**
+   * @brief Create new indexNode
+   *        this new node also will be return as the right child of middle key
+   */
+  treeNode *newIndexNode = new treeNode(targetNode->degree, 0, false);
+  map<int, double>::iterator midKey = targetNode->getMiddleKey();
+  vector<treeNode*>::iterator midChild = targetNode -> getMiddleChild();
+  cout << "[treeNode::insertIndexNode] SPLIT INDEX node by key: " << midKey->first << endl;
+  
+  copyAndDeleteKeys(newIndexNode, midKey, targetNode->keyPairs.end());
+  copyAndDeleteChilds(newIndexNode, midChild, targetNode->childPointers.end());
+  return {midKey->first, newIndexNode};
 }
 
 /**
@@ -105,8 +117,12 @@ pair<int, treeNode*> treeNode::insertLeafNode(
 
   cout << "[treeNode::insertLeafNode] after insertion, LEAF node is OVERFULL" << endl;
   /**
-   * @brief Create new leaf and insert into leafList, this new node will be the RightSide of middle key
+   * @brief Create new leaf and insert into leafList
+   *        this new node also will be return as the right child of middle key
    */
+  treeNode *newLeaf = new treeNode(targetNode->degree, 0, 0, false);
+  
+  // insert in 
   list<treeNode*>::iterator leafInsertPoint;
   for(auto it=leafList.begin(); it!=leafList.end(); it++)  {
     if(targetNode == *it) {
@@ -114,10 +130,9 @@ pair<int, treeNode*> treeNode::insertLeafNode(
       cout << "[treeNode::insertLeafNode] get LEAF node in LeafList" << endl;
     }
   }
-  treeNode *newLeaf = new treeNode(targetNode->degree, 0, 0, false);
   leafList.insert(next(leafInsertPoint), newLeaf);
   
-  map<int, double>::iterator midKey = targetNode->splitByMiddleKey();
+  map<int, double>::iterator midKey = targetNode->getMiddleKey();
   cout << "[treeNode::insertLeafNode] SPLIT LEAF node by key: " << midKey->first << endl;
   copyAndDeleteKeys(newLeaf, midKey, keyPairs.end());
   return {midKey->first, newLeaf};
@@ -128,20 +143,28 @@ pair<int, treeNode*> treeNode::insertLeafNode(
  * 
  * @return map<int, double>::iterator 
  */
-map<int, double>::iterator treeNode::splitByMiddleKey() {
+map<int, double>::iterator treeNode::getMiddleKey() {
   // create new node for the begin to middle keys
-  int mid;
   map<int, double>::iterator midKey = keyPairs.begin();
-  for (mid=0; mid < keyPairs.size()/2; mid++) {
+  for (int mid=0; mid < keyPairs.size()/2; mid++) {
     midKey++;
   }
-  // push target key
+  // push middle key
   return midKey;
 }
 
+vector<treeNode*>::iterator treeNode::getMiddleChild() {
+  vector<treeNode*>::iterator midChild = childPointers.begin();
+  for (int mid=0; mid < childPointers.size()/2; mid++) {
+    midChild++;
+  }
+  // push middle key
+  return midChild;
+}
+
 /**
- * @brief 
- * 
+ * @brief if Node is LEAF -> middle nodes value must also stay in the right new leaf
+ *        No need to consider child list
  * @param newNode 
  * @param start 
  * @param end 
@@ -149,10 +172,16 @@ map<int, double>::iterator treeNode::splitByMiddleKey() {
  */
 int treeNode::copyAndDeleteKeys(
   treeNode *newNode, map<int, double>::iterator start, map<int, double>::iterator end) {
-  cout << "[treeNode::copyAndDeleteKeys] start copy at key: " << start->first << endl;
+  cout << "[treeNode::copyAndDeleteKeys] start at key: " << start->first << endl;
+  
+  map<int, double>::iterator targetCopy = start;
+  if(!isLeaf) {
+    targetCopy = next(start);
+  }
+
   try {
-    for(auto it=start; it != end; it++) {
-      newNode->keyPairs.insert({it->first, it->second});
+    for(; targetCopy != end; targetCopy++) {
+      newNode->keyPairs.insert({targetCopy->first, targetCopy->second});
     }
     keyPairs.erase(start, end);
   }
@@ -162,8 +191,29 @@ int treeNode::copyAndDeleteKeys(
   return 0;
 }
 
+int treeNode::copyAndDeleteChilds(
+  treeNode *newNode, vector<treeNode*>::iterator start, vector<treeNode*>::iterator end) {
+  cout << "[treeNode::copyAndDeleteChilds] start copy and delete childs" << endl;
+  
+  vector<treeNode*>& newChildPointer = newNode->getChildPointers(); 
+  try {
+    for(auto targetCopy = start; targetCopy != end; targetCopy++) {
+      newChildPointer.push_back(*targetCopy);
+    }
+    childPointers.erase(start, end);
+  }
+  catch(exception& e) {
+    cerr << "exception caught: " << e.what() << '\n';
+  }
+  return 0;
+}
+
 bool treeNode::getIsLeaf() {
   return isLeaf;
+}
+
+map<int, double>& treeNode::getKeyPairs() {
+  return keyPairs;
 }
 
 vector<treeNode*>& treeNode::getChildPointers() {

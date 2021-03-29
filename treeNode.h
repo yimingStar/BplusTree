@@ -37,11 +37,22 @@ class treeNode {
       std::list<treeNode*> &leafList
     ); // insert new key-value into 'leaf' node
 
-    std::map<int, double>::iterator splitByMiddleKey();
-    int copyAndDeleteKeys(treeNode *newNode, std::map<int, double>::iterator start, std::map<int, double>::iterator end);
-    
+    std::map<int, double>::iterator getMiddleKey();
+    std::vector<treeNode*>::iterator getMiddleChild();
+    int copyAndDeleteKeys(
+      treeNode *newNode,
+      std::map<int, double>::iterator start,
+      std::map<int, double>::iterator end
+    );
+    int copyAndDeleteChilds(
+      treeNode *newNode,
+      std::vector<treeNode*>::iterator start,
+      std::vector<treeNode*>::iterator end
+    );
+
     // get variable functions
     bool getIsLeaf();
+    std::map<int,double>& getKeyPairs();
     std::vector<treeNode*>& getChildPointers();
 
     // debug functions
