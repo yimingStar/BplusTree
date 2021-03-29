@@ -1,2 +1,2 @@
-bplustree: main.cpp bPlusTree.cpp bplusTree.hpp treeNode.cpp treeNode.hpp
-	g++ -std=c++0x main.cpp bPlustree.cpp treeNode.cpp -o bplustree
+bplustree: main.cpp bplustree.cpp bplustree.hpp treenode.cpp treenode.hpp
+	g++ -std=c++0x main.cpp bplustree.cpp treenode.cpp -o bplustree
