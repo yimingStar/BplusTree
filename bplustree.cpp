@@ -11,16 +11,11 @@ const string nullStr = "Null";
  * Build treeNode class
  * ====================
 */
-treeNode::treeNode(bool isLeaf, int treeDegree) {
-  isLeaf = isLeaf;
-  degree = treeDegree;
-}
-
-treeNode::treeNode(int treeDegree, int key) {
+treeNode::treeNode(int treeDegree, int key, bool insert) {
   // add new key-value pairs into leaf node
   isLeaf = false;
   degree = treeDegree;
-  keyPairs.insert({key, 0}); // set value = 0 for INDEX node. 
+  if(insert) keyPairs.insert({key, 0}); // set value = 0 for INDEX node. 
 }
 
 /**
@@ -29,24 +24,28 @@ treeNode::treeNode(int treeDegree, int key) {
  * @param key 
  * @param value 
  */
-treeNode::treeNode(int treeDegree, int key, double value) {
+treeNode::treeNode(int treeDegree, int key, double value, bool insert) {
   // add new key-value pairs into leaf node
   isLeaf = true;
   degree = treeDegree;
-  keyPairs.insert({key, value});
+  if(insert) keyPairs.insert({key, value});
 }
 
 treeNode* treeNode::searchIndexNode(int key) { 
   assert(!isLeaf);
-  treeNode* targetChild;
-
+  cout << "[treeNode::searchIndexNode] Number of childs: " << childPointers.size() << endl;
+  assert(childPointers.size() > 0); // failed if childPointers = 0
+  
   map<int,double>::iterator targetkey = keyPairs.upper_bound(key);
   int k = distance(keyPairs.begin(), keyPairs.upper_bound(key));
   
-  cout << "[treeNode::searchIndexNode] distance - k:"  << endl;
+  cout << "[treeNode::searchIndexNode] distance - k:" << k << endl;
   vector<treeNode*>::iterator childIdx = childPointers.begin(); 
   childIdx = childIdx + k;
-  return *childIdx;
+  treeNode* targetChild = *childIdx;
+  targetChild->printNodeKeyValue();
+  cout << endl;
+  return targetChild;
 }
 
 /**
@@ -76,18 +75,14 @@ pair<bool, double> treeNode::searchLeafNode(int key) {
  * @param insertPair 
  * @return pair<bool, int> 
  */
-pair<bool, int> treeNode::insertIndexNode(treeNode* targetNode, pair<int, double> insertPair) {
-  // check key size
-  if(targetNode->keyPairs.size() == degree-1) {
-    // OVERFULL
-    cout << "[treeNode::insert] target insertion INSERT node is OVERFULL";
-
-    // push middle key to parent
-    return {true, 0};
-  }
-
+pair<int, treeNode*> treeNode::insertIndexNode(treeNode* targetNode, pair<int, double> insertPair) {
   targetNode->keyPairs.insert(insertPair);
-  return {false, 0};
+  if(targetNode->keyPairs.size() < degree) {
+    return {false, 0};
+  }
+  cout << "[treeNode::insert] target insertion INSERT node is OVERFULL";
+  // push middle key to parent
+  return {true, 0};
 }
 
 /**
@@ -98,19 +93,21 @@ pair<bool, int> treeNode::insertIndexNode(treeNode* targetNode, pair<int, double
  * @param targetNode 
  * @param insertPair 
  * @param leafList 
- * @return pair<bool, int> 
+ * @return pair<int, treeNode*> 
+ *         - int is the split middle key
+ *         - treeNode will be the new SplitNode, right child of the key    
  */
-pair<bool, int> treeNode::insertLeafNode(
+pair<int, treeNode*> treeNode::insertLeafNode(
   treeNode* targetNode, pair<int, double> insertPair, list<treeNode*>& leafList) {
   
   targetNode->keyPairs.insert(insertPair);
   if(targetNode->keyPairs.size() < degree) {
-    return {false, 0};
+    return {0, NULL};
   }
 
   cout << "[treeNode::insertLeafNode] after insertion, LEAF node is OVERFULL" << endl;
   /**
-   * @brief Create new leaf and insert into leafList
+   * @brief Create new leaf and insert into leafList, this new node will be the RightSide of middle key
    */
   list<treeNode*>::iterator leafInsertPoint;
   for(auto it=leafList.begin(); it!=leafList.end(); it++)  {
@@ -119,14 +116,13 @@ pair<bool, int> treeNode::insertLeafNode(
       cout << "[treeNode::insertLeafNode] get LEAF node in LeafList" << endl;
     }
   }
-  treeNode *newLeaf = new treeNode(true, targetNode->degree);
+  treeNode *newLeaf = new treeNode(targetNode->degree, 0, 0, false);
   leafList.insert(next(leafInsertPoint), newLeaf);
   
-  int midkey = -INT_MAX;
   map<int, double>::iterator midKey = targetNode->splitByMiddleKey();
   cout << "[treeNode::insertLeafNode] SPLIT LEAF node by key: " << midKey->first << endl;
   copyAndDeleteKeys(newLeaf, midKey, keyPairs.end());
-  return {true, midkey};
+  return {midKey->first, newLeaf};
 }
 
 /**
@@ -172,7 +168,13 @@ bool treeNode::getIsLeaf() {
   return isLeaf;
 }
 
+vector<treeNode*>& treeNode::getChildPointers() {
+  return childPointers;
+}
 
+/**
+ * @brief [Test] print Nodes KeyPairs
+ */
 void treeNode::printNodeKeyValue() {
   for(auto it=keyPairs.begin(); it != keyPairs.end(); it++) {
     cout << "(" << it->first << "," << it->second << ")";
@@ -217,12 +219,40 @@ int bPlusTree::insertion(int key, double value) {
     treeNode *targetLeaf = searchLeaf(key);
     if(targetLeaf == NULL) {
       // tree is empty
-      root = new treeNode(degree, key, value);
+      root = new treeNode(degree, key, value, true);
       leafList.push_back(root);
       return 0;
     }
     // search the leaf to insert
-    targetLeaf->insertLeafNode(targetLeaf, make_pair(key, value), leafList);
+    pair<int, treeNode*> overfull = targetLeaf->insertLeafNode(targetLeaf, make_pair(key, value), leafList);
+    
+    if(overfull.second == NULL) {
+      cout << "[bPlusTree::insertion] overfull did not occurs" << endl;
+      return 0;
+    }
+
+    treeNode* tIndexNode = NULL;
+    while(overfull.second != NULL) {
+      if(tracePath.size() == 0) {
+        // missing index node -> still split -> need new index node
+        // level change -> new root
+        tIndexNode = new treeNode(degree, overfull.first, true);
+        vector<treeNode*>& childPointer = tIndexNode->getChildPointers(); 
+        childPointer.push_back(root); // mid key left
+        childPointer.push_back(overfull.second); // mid key right
+        root = tIndexNode;
+      }
+      else {
+        tIndexNode = tracePath.back();
+        tracePath.pop_back();
+      }
+
+      cout << "[bPlusTree::insertion] traceback parent indexNode: " << tIndexNode << endl;
+      int bottomUpkey = overfull.first;
+      overfull = tIndexNode->insertIndexNode(tIndexNode, make_pair(bottomUpkey, value));
+    }
+
+    return 0;
   }
   catch(exception& e) {
     cerr << "exception caught: " << e.what() << '\n';

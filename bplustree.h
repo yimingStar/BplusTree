@@ -21,15 +21,18 @@ class treeNode {
     std::vector<treeNode*> childPointers;
   public:
     
-    treeNode(bool isLeaf, int degree); // create node
-    treeNode(int degree, int key); // create index node
-    treeNode(int degree, int key, double value); // create leaf node
+    treeNode(int degree, int key, bool insert); // create index node
+    treeNode(int degree, int key, double value, bool insert); // create leaf node
 
     treeNode* searchIndexNode(int key);
     std::pair<bool, double> searchLeafNode(int key);
 
-    std::pair<bool, int> insertIndexNode(treeNode* target, std::pair<int,double>); // insert new key-value into 'index' node
-    std::pair<bool, int> insertLeafNode(
+    std::pair<int, treeNode*> insertIndexNode(
+      treeNode* target, 
+      std::pair<int,double>
+    ); // insert new key-value into 'index' node
+
+    std::pair<int, treeNode*> insertLeafNode(
       treeNode* target, 
       std::pair<int,double>,
       std::list<treeNode*> &leafList
@@ -40,6 +43,8 @@ class treeNode {
     
     // get variable functions
     bool getIsLeaf();
+    std::vector<treeNode*>& getChildPointers();
+
     // debug functions
     int getNodeNumOfPairs();
     void printNodeKeyValue();

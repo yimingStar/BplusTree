@@ -22,9 +22,11 @@ int main() {
 
   tree.insertion(21, 2.1);
   cout << endl;
+
+  tree.printLeafList();
+  cout << endl;
   tree.search(21);
   cout << endl;
   
-  tree.printLeafList();
   return 0;
 }
