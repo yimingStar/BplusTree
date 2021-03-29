@@ -13,8 +13,6 @@ int main() {
   tree.search(20);
   cout << endl;
 
-  tree.search(22);
-  cout << endl;
   tree.insertion(22, 2.2);
   cout << endl;
   tree.search(22);
@@ -23,10 +21,17 @@ int main() {
   tree.insertion(21, 2.1);
   cout << endl;
 
-  tree.printLeafList();
-  cout << endl;
   tree.search(21);
   cout << endl;
-  
+  tree.printLeafList();
+  cout << endl;
+
+  tree.insertion(23, 2.3);
+  cout << endl;
+
+  tree.printLeafList();
+  cout << endl;
+
+  // tree.printTree(tree.root);
   return 0;
 }
