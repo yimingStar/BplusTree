@@ -7,24 +7,68 @@ using namespace std;
  * 2. [Important] Output the result into output.txt
 */
 int main() {
-  bPlusTree tree(3);
-  tree.insertion(20, 2.0);
+  // bPlusTree T(3);
+  // T.insertion(20,0.1);
+  // T.insertion(21,0.1);
+  // T.insertion(22,0.1);
+  // cout << endl;
+  // T.printTree(T.getRoot());
+  // cout << endl;
+
+  // T.insertion(18,0.1);
+  // cout << endl;
+  // T.printTree(T.getRoot());
+  // cout << endl;
+  // T.insertion(19,0.1);
+  // cout << endl;
+  // T.printTree(T.getRoot());
+  // cout << endl;
+
+  bPlusTree T(3);
+  T.insertion(10,0.1);
   cout << endl;
-  tree.search(20);
+  T.insertion(30,0.3);
+  cout << endl;
+  T.insertion(20,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
   cout << endl;
 
-  tree.search(22);
+  T.insertion(40,0.2);
   cout << endl;
-  tree.insertion(22, 2.2);
-  cout << endl;
-  tree.search(22);
+  T.printTree(T.getRoot());
   cout << endl;
 
-  tree.insertion(21, 2.1);
+  T.insertion(50,0.2);
   cout << endl;
-  tree.search(21);
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.insertion(60,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
   cout << endl;
   
-  tree.printLeafList();
+  T.insertion(70,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.insertion(31,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+  
+  T.insertion(32,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.insertion(33,0.2);
+  cout << endl;
+  T.printTree(T.getRoot());
+  cout << endl;
+
+  T.printLeafList();
   return 0;
 }

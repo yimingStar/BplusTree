@@ -1,177 +1,10 @@
-#include "bplustree.h"
-
 #include <iostream>
 #include <assert.h> 
 #include <limits.h>
 using namespace std;
 
-const string nullStr = "Null";
-
-/**
- * Build treeNode class
- * ====================
-*/
-treeNode::treeNode(bool isLeaf, int treeDegree) {
-  isLeaf = isLeaf;
-  degree = treeDegree;
-  maxPairSize = treeDegree - 1;
-}
-
-treeNode::treeNode(int treeDegree, int key) {
-  // add new key-value pairs into leaf node
-  isLeaf = false;
-  degree = treeDegree;
-  maxPairSize = treeDegree - 1;
-  keyPairs.insert({key, 0}); // set value = 0 for INDEX node. 
-}
-
-/**
- * @brief Construct a new Leaf Node
- * 
- * @param key 
- * @param value 
- */
-treeNode::treeNode(int treeDegree, int key, double value) {
-  // add new key-value pairs into leaf node
-  isLeaf = true;
-  degree = treeDegree;
-  maxPairSize = treeDegree - 1;
-  keyPairs.insert({key, value});
-}
-
-treeNode* treeNode::searchIndexNode(int key) { 
-  assert(!isLeaf);
-  treeNode* targetChild;
-
-  map<int,double>::iterator targetkey = keyPairs.upper_bound(key);
-  int k = distance(keyPairs.begin(), keyPairs.upper_bound(key));
-  
-  cout << "[treeNode::searchIndexNode] distance - k:"  << endl;
-  vector<treeNode*>::iterator childIdx = childPointers.begin(); 
-  childIdx = childIdx + k;
-  return *childIdx;
-}
-
-/**
- * @brief return key
- *        if bool = true --> hit, return value
- *        if bool = false --> miss, return Null
- * 
- * @param key 
- * @return pair<bool, double> 
- */
-pair<bool, double> treeNode::searchLeafNode(int key) {
-  assert(isLeaf);
-
-  map<int,double>::iterator targetElement;
-  targetElement = keyPairs.find(key);
-  if(targetElement != keyPairs.end()) {
-    return {true, targetElement->second};
-  }
-
-  return {false, 0};
-}
-
-/**
- * @brief 
- * 
- * @param targetNode 
- * @param insertPair 
- * @return pair<bool, int> 
- */
-pair<bool, int> treeNode::insertIndexNode(treeNode* targetNode, pair<int, double> insertPair) {
-  // check key size
-  if(targetNode->keyPairs.size() == maxPairSize) {
-    // OVERFULL
-    cout << "[treeNode::insert] target insertion INSERT node is OVERFULL";
-
-    // push middle key to parent
-    return {true, 0};
-  }
-
-  targetNode->keyPairs.insert(insertPair);
-  return {false, 0};
-}
-
-pair<bool, int> treeNode::insertLeafNode(
-  treeNode* targetNode, pair<int, double> insertPair, list<treeNode*>& leafList) {
-  // check keyPair size
-  if(targetNode->keyPairs.size() == maxPairSize) {
-    targetNode->keyPairs.insert(insertPair);
-    // OVERFULL
-    cout << "[treeNode::insertLeafNode] after insertion, LEAF node is OVERFULL" << endl;
-
-    int midkey = -INT_MAX;
-    map<int, double>::iterator midKey = targetNode->splitByMiddleKey();
-    cout << "[treeNode::insertLeafNode] split leaf node by key: " << midKey->first << endl;
-
-    /**
-     * @brief Create new leaf and insert into leafList
-     */
-    list<treeNode*>::iterator leafInsertPoint;
-    for(auto it=leafList.begin(); it!=leafList.end(); it++)  {
-      if(targetNode == *it) {
-        leafInsertPoint = it;
-        cout << "[treeNode::insertLeafNode] get LEAF node in LeafList" << endl;
-      }
-    }
-    treeNode *newLeaf = new treeNode(true, targetNode->degree);
-    leafList.insert(next(leafInsertPoint), newLeaf);
-    
-    copyAndDeleteKeys(newLeaf, midKey, keyPairs.end());
-    return {true, midkey};
-  }
-
-  targetNode->keyPairs.insert(insertPair);
-  return {false, 0};
-}
-
-map<int, double>::iterator treeNode::splitByMiddleKey() {
-  // create new node for the begin to middle keys
-  int mid;
-  map<int, double>::iterator midKey = keyPairs.begin();
-  for (mid=0; mid < keyPairs.size()/2; mid++) {
-    midKey++;
-  }
-  // push target key
-  return midKey;
-}
-
-/**
- * @brief 
- * 
- * @param newNode 
- * @param start 
- * @param end 
- * @return int - {0} = success, {-1} = failed 
- */
-int treeNode::copyAndDeleteKeys(
-  treeNode *newNode, map<int, double>::iterator start, map<int, double>::iterator end) {
-  cout << "[treeNode::copyAndDeleteKeys] start copy at key: " << start->first << endl;
-  try {
-    for(auto it=start; it != end; it++) {
-      newNode->keyPairs.insert({it->first, it->second});
-    }
-    keyPairs.erase(start, end);
-  }
-  catch(exception& e) {
-    cerr << "exception caught: " << e.what() << '\n';
-  }
-  return 0;
-}
-
-bool treeNode::getIsLeaf() {
-  return isLeaf;
-}
-
-
-void treeNode::printNodeKeyValue() {
-  for(auto it=keyPairs.begin(); it != keyPairs.end(); it++) {
-    cout << "(" << it->first << "," << it->second << ")";
-  }
-}
-
-
+#include "bplustree.h"
+#include "constant.h"
 /**
  * Build bPlusTree class
  * =====================
@@ -201,20 +34,67 @@ int bPlusTree::getTreeDegree() {
  */
 int bPlusTree::insertion(int key, double value) {
   cout << "[bPlusTree::insertion] insert (key, value) = (" << key << "," << value  << ")" << endl;
+
   /**
    * No need to search the tree first (the insert key value has no duplication) 
   */
-
   try {
     treeNode *targetLeaf = searchLeaf(key);
     if(targetLeaf == NULL) {
       // tree is empty
-      root = new treeNode(degree, key, value);
+      root = new treeNode(degree, key, value, true);
       leafList.push_back(root);
       return 0;
     }
-    // search the leaf to insert
-    targetLeaf->insertLeafNode(targetLeaf, make_pair(key, value), leafList);
+    // search the target leaf to insert
+    pair<int, treeNode*> overfull = targetLeaf->insertLeafNode(targetLeaf, make_pair(key, value), leafList);
+    
+    if(overfull.second == NULL) {
+      cout << "[bPlusTree::insertion] overfull did not occurs" << endl;
+      return 0;
+    }
+
+    treeNode* tIndexNode = NULL;
+    /**
+     * @brief Overfull occurs, dealing bottom up key and new node
+     */
+    while(overfull.second != NULL) {
+      if(tracePath.size() == 0) {
+        /**
+        * @brief No index node parent
+        * 1. New a new index parent
+        * 2. Assign left, right child (new node)
+        */
+        tIndexNode = new treeNode(degree, overfull.first, true);
+        vector<treeNode*>& childPointer = tIndexNode->getChildPointers(); 
+        childPointer.push_back(root); // left split child
+        childPointer.push_back(overfull.second); // right split child
+        root = tIndexNode;
+        break;
+      }
+
+      /**
+       * @brief Exist index node parent -> insert key and assign child to index node
+       * 1. Assign new node to the proper location (lowest bound < new node smallest key)
+       * 2. Insert new index into parent
+       *    -> might need continue splitting 
+       */
+      tIndexNode = tracePath.back();
+      vector<treeNode*>& childPointer = tIndexNode->getChildPointers(); 
+      treeNode *newLeaf = overfull.second;
+      int newLeafMinKey = prev(newLeaf->getKeyPairs().end())->first;
+      
+      int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey));
+      vector<treeNode*>::iterator childit = childPointer.begin(); 
+      childPointer.insert(next(childit+k), newLeaf);
+      tracePath.pop_back();
+      
+      cout << "[bPlusTree::insertion] traceback parent indexNode: " << tIndexNode << endl;
+      int bottomUpkey = overfull.first;
+      overfull = tIndexNode->insertIndexNode(tIndexNode, make_pair(bottomUpkey, defaultIndexValue));
+    }
+
+    return 0;
   }
   catch(exception& e) {
     cerr << "exception caught: " << e.what() << '\n';
@@ -287,6 +167,10 @@ int bPlusTree::search(int key) {
   return 0;
 }
 
+/**
+ * @brief [Test]
+ * 
+ */
 void bPlusTree::printLeafList() {
   cout << "[bPlusTree::printLeafList]" << endl;
   treeNode *node = NULL;
@@ -296,4 +180,32 @@ void bPlusTree::printLeafList() {
     (*it)->printNodeKeyValue();
     cout << endl;
   }
+}
+
+/**
+ * @brief [Test]
+ * 
+ */
+void bPlusTree::printTree(treeNode* root) {
+  cout << "[bPlusTree::printTree] ";
+  if(!root->getIsLeaf()) {
+    cout << "INDEX: ";
+  }
+  else {
+    cout << "LEAF: ";
+  }
+  root->printNodeKeyValue();
+  cout << endl;
+  // vector<treeNode*>& childPointer = root->getChildPointers(); 
+  // cout << childPointer.size() << endl;
+  // cout << endl;
+  if(!root->getIsLeaf()) {
+    for(auto it=root->getChildPointers().begin(); it != root->getChildPointers().end(); it++) {
+      printTree(*it);
+    }
+  }
+}
+
+treeNode* bPlusTree::getRoot(){
+  return root;
 }
