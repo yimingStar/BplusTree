@@ -106,13 +106,13 @@ int bPlusTree::insertion(int key, double value) {
  */
 int bPlusTree::deletion(int key) {
   cout << "[bPlusTree::deletion] delete key: " << key <<", minPairsSize: " << minPairsSize << endl; 
-  treeNode *targetLeaf = searchLeaf(key);
-  if(targetLeaf == NULL) {
+  treeNode *targetNode = searchLeaf(key);
+  if(targetNode == NULL) {
     return -1;
   }
 
   // search the target leaf to insert
-  bool isDeficient = targetLeaf->deleteLeafNode(key);
+  bool isDeficient = targetNode->deleteLeafNode(key);
   // check key
   /**
    * @brief 
@@ -120,17 +120,29 @@ int bPlusTree::deletion(int key) {
    * 2. combine()
    */
   treeNode* parent = NULL;
-
+  bool hasBorrow = false;
+  bool hasCombine = false;
+  
   // 1. LEAF borrow from siblings
   if(isDeficient) {
     cout << "[bPlusTree::deletion] target LEAF deficient" <<  endl; 
-    if(tracePath.size() != 0) {
-      parent = tracePath.back();
-      if(borrow(parent, targetLeaf)) isDeficient = false;
+    if(tracePath.size() == 0) {
+      // deficient node is root 
+      return 0;
     }
+
+    parent = tracePath.back();
+    hasBorrow = borrow(parent, targetNode);
+    if(hasBorrow) isDeficient = false;
   }
 
+  // 2. combine with siblings
   while(isDeficient) {
+    hasCombine = combine(parent, targetNode);
+    if(hasCombine) {
+
+    }
+
     break;
   }
 
@@ -148,12 +160,17 @@ bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
   auto childIt = parent->getChildPointers().begin(); 
   for(; childIt!=parent->getChildPointers().end(); childIt++) {
     if(*childIt == deficient) {
-      rightSib = *next(childIt);
-      leftSib = *prev(childIt);
+      if(childIt != prev(parent->getChildPointers().end())) {
+        rightSib = *next(childIt);
+      }
+      if(childIt != parent->getChildPointers().begin()) {
+        leftSib = *prev(childIt);
+      }
       break;
     }
   } 
-
+  
+  cout << "[bPlusTree::borrow] right sibling size: " << rightSib->getKeyPairs().size() << endl; 
   if(rightSib != NULL && rightSib->getKeyPairs().size() - 1 >= minPairsSize) {
     cout << "[bPlusTree::borrow] eligible borrow from right sibling" << endl; 
     // eligible borrow from right sibling
@@ -161,7 +178,6 @@ bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
     deficient->getKeyPairs().insert({minValue->first, minValue->second});
     rightSib->getKeyPairs().erase(minValue);
     rightBorrow = true;
-    cout << "[bPlusTree::borrow] end borrow from right sibling" << endl; 
   }
   else if(leftSib != NULL && leftSib->getKeyPairs().size() - 1 >= minPairsSize) {
     // eligible borrow from left sibling
@@ -170,15 +186,14 @@ bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
     deficient->getKeyPairs().insert({maxValue->first, maxValue->second});
     leftSib->getKeyPairs().erase(maxValue);
     leftBorrow = true;
-    cout << "[bPlusTree::borrow] end borrow from left sibling" << endl; 
   }
   
   bool hasBorrow = (rightBorrow|leftBorrow);
   /**
    * @brief Borrow occurs
-   * Adjust the key in parent ,  node with the newMin value
-   * 1. Rightborrow -> the right sibling has new min value
-   * 2. Leftborrow -> the deficient node itself get a new min value 
+   * Adjust the key in parent by cheking the node with the newMin value
+   * 1. Rightborrow -> the right sibling has newMin value
+   * 2. Leftborrow -> the deficient node itself get a newMin value 
    */
   if(hasBorrow) {
     int keyIndex = 0;
@@ -200,6 +215,81 @@ bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
 
   return hasBorrow;
 } 
+
+
+bool bPlusTree::combine(treeNode* parent, treeNode* deficient) {
+  cout << "[bPlusTree::combine] check if we can combine" << endl; 
+  treeNode *rightSib = NULL;
+  treeNode *leftSib = NULL;
+
+  bool rightCombine = false;
+  bool leftCombine = false;
+
+  auto childIt = parent->getChildPointers().begin(); 
+  for(; childIt!=parent->getChildPointers().end(); childIt++) {
+    if(*childIt == deficient) {
+      if(childIt != prev(parent->getChildPointers().end())) {
+        rightSib = *next(childIt);
+      }
+      if(childIt != parent->getChildPointers().begin()) {
+        leftSib = *prev(childIt);
+      }
+      break;
+    }
+  }
+
+  if(rightSib != NULL) {
+    // merge with right
+    rightSib->getKeyPairs().insert(deficient->getKeyPairs().begin(), deficient->getKeyPairs().end());
+    deficient->getKeyPairs().clear();
+    rightCombine = true;
+  }
+  else if(leftSib != NULL) {
+    // merge with left
+    leftCombine = true;
+  }
+
+  /**
+   * @brief Conbine occurs
+   * Adjust the key in parent.
+   */
+  bool hasCombine = (rightCombine|leftCombine);
+  if(hasCombine) {
+    int keyIndex = 0;
+    auto adjustKey = parent->getKeyPairs().begin();
+    
+    treeNode *targetNode = rightSib;
+    auto targetNodeIt = next(childIt);
+    if(leftCombine) {
+      targetNode = deficient;
+      targetNodeIt = childIt;
+    }
+
+    keyIndex = distance(parent->getChildPointers().begin(), targetNodeIt) - 1;
+    adjustKey = next(adjustKey, keyIndex);
+
+    // 
+    parent->getKeyPairs().erase(adjustKey->first);
+    
+    // Remove LEAF in childPairsList
+    parent->getChildPointers().erase(childIt);
+
+    // Remove LEAF in leafList
+    if(targetNode->getIsLeaf()) {
+      for(auto itLeaf=leafList.begin(); itLeaf != leafList.end(); itLeaf++) {
+        if(*itLeaf == deficient) {
+          leafList.erase(itLeaf);
+        }
+      }
+    }
+
+    // Free space from pointer
+    delete deficient;
+    deficient = NULL; 
+  }
+
+  return hasCombine;
+}
 
 /**
  * @brief Search target leaf node with integer, reuse in insert
