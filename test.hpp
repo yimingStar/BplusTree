@@ -4,9 +4,9 @@
 
 class test {
   public:
-    void testSearch(bPlusTree &tree);
+    void testSearch(bPlusTree &tree, int version);
     void testRangeSearch(bPlusTree &T);
-    void testInsertion(bPlusTree &tree);
+    void testInsertion(bPlusTree &tree, int version);
     void testDeletetion(bPlusTree &tree);
 };
 
