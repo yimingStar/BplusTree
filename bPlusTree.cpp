@@ -17,7 +17,7 @@ using namespace std;
  */
 bPlusTree::bPlusTree(int m) {
   degree = m;
-  minPairsSize = ceil(m/2) - 1;
+  minPairsSize = (m+1)/2 - 1;
   root = NULL;
 }
 
@@ -105,7 +105,7 @@ int bPlusTree::insertion(int key, double value) {
  * @return int 
  */
 int bPlusTree::deletion(int key) {
-  cout << "[bPlusTree::deletion] delete key: " << key << endl; 
+  cout << "[bPlusTree::deletion] delete key: " << key <<", minPairsSize: " << minPairsSize << endl; 
   treeNode *targetLeaf = searchLeaf(key);
   if(targetLeaf == NULL) {
     return -1;
@@ -123,9 +123,10 @@ int bPlusTree::deletion(int key) {
 
   // 1. LEAF borrow from siblings
   if(isDeficient) {
+    cout << "[bPlusTree::deletion] target LEAF deficient" <<  endl; 
     if(tracePath.size() != 0) {
       parent = tracePath.back();
-      if(borrow(parent, targetLeaf).second) isDeficient = false;
+      if(borrow(parent, targetLeaf)) isDeficient = false;
     }
   }
 
@@ -137,6 +138,7 @@ int bPlusTree::deletion(int key) {
 }
 
 bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
+  cout << "[bPlusTree::borrow] check if we can borrow" << endl; 
   treeNode *rightSib = NULL;
   treeNode *leftSib = NULL;
 
@@ -148,22 +150,27 @@ bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
     if(*childIt == deficient) {
       rightSib = *next(childIt);
       leftSib = *prev(childIt);
+      break;
     }
   } 
 
   if(rightSib != NULL && rightSib->getKeyPairs().size() - 1 >= minPairsSize) {
+    cout << "[bPlusTree::borrow] eligible borrow from right sibling" << endl; 
     // eligible borrow from right sibling
     auto minValue = rightSib->getKeyPairs().begin();
     deficient->getKeyPairs().insert({minValue->first, minValue->second});
     rightSib->getKeyPairs().erase(minValue);
     rightBorrow = true;
+    cout << "[bPlusTree::borrow] end borrow from right sibling" << endl; 
   }
   else if(leftSib != NULL && leftSib->getKeyPairs().size() - 1 >= minPairsSize) {
     // eligible borrow from left sibling
+    cout << "[bPlusTree::borrow] eligible borrow from left sibling" << endl; 
     auto maxValue = prev(leftSib->getKeyPairs().end());
     deficient->getKeyPairs().insert({maxValue->first, maxValue->second});
     leftSib->getKeyPairs().erase(maxValue);
     leftBorrow = true;
+    cout << "[bPlusTree::borrow] end borrow from left sibling" << endl; 
   }
   
   bool hasBorrow = (rightBorrow|leftBorrow);

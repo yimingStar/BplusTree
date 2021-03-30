@@ -19,7 +19,7 @@ treeNode::treeNode(int treeDegree, int key, bool insert) {
   isLeaf = false;
   degree = treeDegree;
   maxPairsSize = treeDegree - 1;
-  minPairsSize = ceil(treeDegree/2) - 1;
+  minPairsSize = (treeDegree+1)/2 - 1;
   if(insert) keyPairs.insert({key, defaultIndexValue}); // set value = 0 for INDEX node. 
 }
 
@@ -31,7 +31,7 @@ treeNode::treeNode(int treeDegree, int key, double value, bool insert) {
   isLeaf = true;
   degree = treeDegree;
   maxPairsSize = treeDegree - 1;
-  minPairsSize = ceil(treeDegree/2) - 1;
+  minPairsSize = (treeDegree+1)/2 - 1;
   if(insert) keyPairs.insert({key, value});
 }
 
@@ -224,6 +224,7 @@ int treeNode::copyAndDeleteChilds(
  * @return treeNode* deficient node or NULL
  */
 bool treeNode::deleteLeafNode(int key) {
+  cout << "[treeNode::deleteLeafNode] delete in leaf, key: " << key << endl;
   for(auto it=keyPairs.begin(); it!=keyPairs.end(); it++) {
     if(it->first == key) {
       // find key -> erase
