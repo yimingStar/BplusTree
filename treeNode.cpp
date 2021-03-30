@@ -1,6 +1,6 @@
 #include <iostream>
 #include <assert.h> 
-#include <limits.h>
+#include <math.h>
 
 #include "treeNode.hpp"
 #include "constant.hpp"
@@ -10,23 +10,28 @@ using namespace std;
  * Build treeNode class
  * ====================
 */
+
+/**
+ * @brief Construct a new INDEX node
+ */
 treeNode::treeNode(int treeDegree, int key, bool insert) {
   // add new key-value pairs into leaf node
   isLeaf = false;
   degree = treeDegree;
+  maxPairsSize = treeDegree - 1;
+  minPairsSize = ceil(treeDegree/2) - 1;
   if(insert) keyPairs.insert({key, defaultIndexValue}); // set value = 0 for INDEX node. 
 }
 
 /**
- * @brief Construct a new Leaf Node
- * 
- * @param key 
- * @param value 
+ * @brief Construct a new LEAF node
  */
 treeNode::treeNode(int treeDegree, int key, double value, bool insert) {
   // add new key-value pairs into leaf node
   isLeaf = true;
   degree = treeDegree;
+  maxPairsSize = treeDegree - 1;
+  minPairsSize = ceil(treeDegree/2) - 1;
   if(insert) keyPairs.insert({key, value});
 }
 
@@ -206,6 +211,33 @@ int treeNode::copyAndDeleteChilds(
     cerr << "exception caught: " << e.what() << '\n';
   }
   return 0;
+}
+
+/**
+ * @brief delete key, value in leaf node.
+ *        if node become deficient; return the broken node
+ *        
+ * 
+ * @param target 
+ * @param key 
+ * @param leafList 
+ * @return treeNode* deficient node or NULL
+ */
+bool treeNode::deleteLeafNode(int key) {
+  for(auto it=keyPairs.begin(); it!=keyPairs.end(); it++) {
+    if(it->first == key) {
+      // find key -> erase
+      keyPairs.erase(it);
+      break;
+    }
+  }
+
+  if(keyPairs.size() >= minPairsSize) {
+    return false;
+  }
+
+  cout << "[treeNode::deleteLeafNode] after deletion, LEAF node is DEFICIENT" << endl;
+  return true;
 }
 
 bool treeNode::getIsLeaf() {

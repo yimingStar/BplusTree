@@ -1,7 +1,7 @@
 #include <iostream>
 #include <assert.h> 
-#include <limits.h>
 #include <iomanip>
+#include <math.h>
 using namespace std;
 
 #include "bPlusTree.hpp"
@@ -17,6 +17,7 @@ using namespace std;
  */
 bPlusTree::bPlusTree(int m) {
   degree = m;
+  minPairsSize = ceil(m/2) - 1;
   root = NULL;
 }
 
@@ -39,67 +40,61 @@ int bPlusTree::insertion(int key, double value) {
   /**
    * No need to search the tree first (the insert key value has no duplication) 
   */
-  try {
-    treeNode *targetLeaf = searchLeaf(key);
-    if(targetLeaf == NULL) {
-      // tree is empty
-      root = new treeNode(degree, key, value, true);
-      leafList.push_back(root);
-      return 0;
-    }
-    // search the target leaf to insert
-    pair<int, treeNode*> overfull = targetLeaf->insertLeafNode(targetLeaf, make_pair(key, value), leafList);
-    
-    if(overfull.second == NULL) {
-      cout << "[bPlusTree::insertion] overfull did not occurs" << endl;
-      return 0;
-    }
-
-    treeNode* tIndexNode = NULL;
-    /**
-     * @brief Overfull occurs, dealing bottom up key and new node
-     */
-    while(overfull.second != NULL) {
-      if(tracePath.size() == 0) {
-        /**
-        * @brief No index node parent
-        * 1. New a new index parent
-        * 2. Assign left, right child (new node)
-        */
-        tIndexNode = new treeNode(degree, overfull.first, true);
-        vector<treeNode*>& childPointer = tIndexNode->getChildPointers(); 
-        childPointer.push_back(root); // left split child
-        childPointer.push_back(overfull.second); // right split child
-        root = tIndexNode;
-        break;
-      }
-
-      /**
-       * @brief Exist index node parent -> insert key and assign child to index node
-       * 1. Assign new node to the proper location (lowest bound < new node smallest key)
-       * 2. Insert new index into parent
-       *    -> might need continue splitting 
-       */
-      tIndexNode = tracePath.back();
-      vector<treeNode*>& childPointer = tIndexNode->getChildPointers(); 
-      treeNode *newLeaf = overfull.second;
-      int newLeafMinKey = prev(newLeaf->getKeyPairs().end())->first;
-      
-      int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey));
-      vector<treeNode*>::iterator childit = childPointer.begin(); 
-      childPointer.insert(next(childit+k), newLeaf);
-      tracePath.pop_back();
-      
-      cout << "[bPlusTree::insertion] traceback parent indexNode: " << tIndexNode << endl;
-      int bottomUpkey = overfull.first;
-      overfull = tIndexNode->insertIndexNode(tIndexNode, make_pair(bottomUpkey, defaultIndexValue));
-    }
-
+  treeNode *targetLeaf = searchLeaf(key);
+  if(targetLeaf == NULL) {
+    // tree is empty
+    root = new treeNode(degree, key, value, true);
+    leafList.push_back(root);
     return 0;
   }
-  catch(exception& e) {
-    cerr << "exception caught: " << e.what() << '\n';
+  // search the target leaf to insert
+  pair<int, treeNode*> isOverfull = targetLeaf->insertLeafNode(targetLeaf, make_pair(key, value), leafList);
+  
+  if(isOverfull.second == NULL) {
+    cout << "[bPlusTree::insertion] overfull did not occurs" << endl;
+    return 0;
   }
+
+  treeNode* tIndexNode = NULL;
+  /**
+   * @brief Overfull occurs, dealing bottom up key and new node
+   */
+  while(isOverfull.second != NULL) {
+    if(tracePath.size() == 0) {
+      /**
+      * @brief No index node parent
+      * 1. New a new index parent
+      * 2. Assign left, right child (new node)
+      */
+      tIndexNode = new treeNode(degree, isOverfull.first, true);
+      vector<treeNode*>& childPointer = tIndexNode->getChildPointers(); 
+      childPointer.push_back(root); // left split child
+      childPointer.push_back(isOverfull.second); // right split child
+      root = tIndexNode;
+      break;
+    }
+
+    /**
+     * @brief Exist index node parent -> insert key and assign child to index node
+     * 1. Assign new node to the proper location (lowest bound < new node smallest key)
+     * 2. Insert new index into parent
+     *    -> might need continue splitting by checking overfull
+     */
+    tIndexNode = tracePath.back();
+    vector<treeNode*>& childPointer = tIndexNode->getChildPointers(); 
+    treeNode *newLeaf = isOverfull.second;
+    int newLeafMinKey = prev(newLeaf->getKeyPairs().end())->first;
+    
+    int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey));
+    vector<treeNode*>::iterator childit = childPointer.begin(); 
+    childPointer.insert(next(childit+k), newLeaf);
+    tracePath.pop_back();
+    
+    cout << "[bPlusTree::insertion] traceback parent indexNode: " << tIndexNode << endl;
+    int bottomUpkey = isOverfull.first;
+    isOverfull = tIndexNode->insertIndexNode(tIndexNode, make_pair(bottomUpkey, defaultIndexValue));
+  }
+
   return 0;
 }
 
@@ -110,8 +105,94 @@ int bPlusTree::insertion(int key, double value) {
  * @return int 
  */
 int bPlusTree::deletion(int key) {
+  cout << "[bPlusTree::deletion] delete key: " << key << endl; 
+  treeNode *targetLeaf = searchLeaf(key);
+  if(targetLeaf == NULL) {
+    return -1;
+  }
+
+  // search the target leaf to insert
+  bool isDeficient = targetLeaf->deleteLeafNode(key);
+  // check key
+  /**
+   * @brief 
+   * 1. borrow() -> look into right, left sibling
+   * 2. combine()
+   */
+  treeNode* parent = NULL;
+
+  // 1. LEAF borrow from siblings
+  if(isDeficient) {
+    if(tracePath.size() != 0) {
+      parent = tracePath.back();
+      if(borrow(parent, targetLeaf).second) isDeficient = false;
+    }
+  }
+
+  while(isDeficient) {
+    break;
+  }
+
   return 0;
 }
+
+bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
+  treeNode *rightSib = NULL;
+  treeNode *leftSib = NULL;
+
+  bool rightBorrow = false;
+  bool leftBorrow = false;
+
+  auto childIt = parent->getChildPointers().begin(); 
+  for(; childIt!=parent->getChildPointers().end(); childIt++) {
+    if(*childIt == deficient) {
+      rightSib = *next(childIt);
+      leftSib = *prev(childIt);
+    }
+  } 
+
+  if(rightSib != NULL && rightSib->getKeyPairs().size() - 1 >= minPairsSize) {
+    // eligible borrow from right sibling
+    auto minValue = rightSib->getKeyPairs().begin();
+    deficient->getKeyPairs().insert({minValue->first, minValue->second});
+    rightSib->getKeyPairs().erase(minValue);
+    rightBorrow = true;
+  }
+  else if(leftSib != NULL && leftSib->getKeyPairs().size() - 1 >= minPairsSize) {
+    // eligible borrow from left sibling
+    auto maxValue = prev(leftSib->getKeyPairs().end());
+    deficient->getKeyPairs().insert({maxValue->first, maxValue->second});
+    leftSib->getKeyPairs().erase(maxValue);
+    leftBorrow = true;
+  }
+  
+  bool hasBorrow = (rightBorrow|leftBorrow);
+  /**
+   * @brief Borrow occurs
+   * Adjust the key in parent ,  node with the newMin value
+   * 1. Rightborrow -> the right sibling has new min value
+   * 2. Leftborrow -> the deficient node itself get a new min value 
+   */
+  if(hasBorrow) {
+    int keyIndex = 0;
+    auto adjustKey = parent->getKeyPairs().begin();
+    
+    treeNode *targetNode = rightSib;
+    auto targetNodeIt = next(childIt);
+    if(leftBorrow) {
+      targetNode = deficient;
+      targetNodeIt = childIt;
+    }
+
+    keyIndex = distance(parent->getChildPointers().begin(), targetNodeIt) - 1;
+    adjustKey = next(adjustKey, keyIndex);
+    parent->getKeyPairs().erase(adjustKey->first);
+    pair<int, double> newKey = {targetNode->getKeyPairs().begin()->first, targetNode->getKeyPairs().begin()->second};
+    parent->getKeyPairs().insert(newKey);
+  }
+
+  return hasBorrow;
+} 
 
 /**
  * @brief Search target leaf node with integer, reuse in insert
@@ -129,8 +210,9 @@ treeNode* bPlusTree::searchLeaf(int key) {
   try {
     while(targetNode != NULL) {
       if(!targetNode->getIsLeaf()) {
-        // indexNode
-        // pick the correct child and keep the traversal
+        /**
+         * @brief Push the index node into path stack, keep on the top down searching
+         */
         tracePath.push_back(targetNode);
         targetNode = targetNode->searchIndexNode(key);
       }

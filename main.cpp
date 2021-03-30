@@ -10,8 +10,13 @@ using namespace std;
 int main() {
   bPlusTree tree1(3);
   test doTest;
-  doTest.testInsertion(tree1);
-  doTest.testRangeSearch(tree1);
-
+  doTest.testInsertion(tree1, 2);
+  // doTest.testRangeSearch(tree1);
+  cout << endl;
+  tree1.printTree(tree1.getRoot());
+  cout << endl;
+  tree1.deletion(30);
+  cout << endl;
+  tree1.printTree(tree1.getRoot());
   return 0;
 }

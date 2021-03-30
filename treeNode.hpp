@@ -10,12 +10,13 @@
 class treeNode {
   private:
     /**
-     * Size of this map will be degree-1
-     * Which will be the maximum key pairs in one node. 
+     * Maximum keyPairs = degree-1; 
+     * Minimum keyPairs = ceil(degree/2)-1
     */
     bool isLeaf;
     int degree;
-    int maxPairSize;  
+    int maxPairsSize; 
+    int minPairsSize;
     std::map<int,double> keyPairs;
     std::vector<treeNode*> childPointers;
   public:
@@ -23,9 +24,15 @@ class treeNode {
     treeNode(int degree, int key, bool insert); // create index node
     treeNode(int degree, int key, double value, bool insert); // create leaf node
 
+    /**
+     * SEARCH 
+     */
     treeNode* searchIndexNode(int key);
     std::pair<bool, double> searchLeafNode(int key);
 
+    /**
+     * INSERT 
+     */
     std::pair<int, treeNode*> insertIndexNode(
       treeNode* target, 
       std::pair<int,double>
@@ -49,6 +56,11 @@ class treeNode {
       std::vector<treeNode*>::iterator start,
       std::vector<treeNode*>::iterator end
     );
+
+    /**
+     * DELETE 
+     */
+    bool deleteLeafNode(int key);
 
     // get variable functions
     bool getIsLeaf();

@@ -11,27 +11,28 @@
 class bPlusTree {
   private: 
     int degree;
+    int minPairsSize;
     treeNode *root;
     std::vector<treeNode*> tracePath;
     std::list<treeNode*> leafList;
   public:
-  /**
-   * project description functions
-   */
-  bPlusTree(int m);
-  int insertion(int key, double value);
-  int deletion(int key);
+    bPlusTree(int m);
+    int insertion(int key, double value);
+    
+    int deletion(int key);
+    bool borrow(treeNode* parent, treeNode *deficient);
+    bool combine(treeNode* parent, treeNode *deficient);
 
-  int search(int key);
-  int searchRange(int start, int finish);
-  treeNode* searchLeaf(int key);
-  /**
-   * test functions
-   */
-  int getTreeDegree();
-  void printLeafList();
-  void printTree(treeNode* root);
-  treeNode* getRoot();
+    int search(int key);
+    int searchRange(int start, int finish);
+    treeNode* searchLeaf(int key);
+    /**
+     * test functions
+     */
+    int getTreeDegree();
+    void printLeafList();
+    void printTree(treeNode* root);
+    treeNode* getRoot();
 };
 
 #endif  // BPLUSTREE_H_
