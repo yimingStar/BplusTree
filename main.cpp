@@ -12,11 +12,8 @@ int main() {
   test doTest;
   doTest.testInsertion(tree1, 1);
   cout << endl;
-  tree1.printTree(tree1.getRoot());
-  cout << endl;
   tree1.deletion(20);
-  cout << endl;
-  tree1.printTree(tree1.getRoot());
+  tree1.deletion(40);
   tree1.deletion(10);
   tree1.printTree(tree1.getRoot());
   return 0;
@@ -66,4 +63,17 @@ int main() {
   // cout << endl;
   // tree1.printTree(tree1.getRoot());
   // tree1.deletion(10);
+  // return 0;
+
+// test 4 delete
+  // bPlusTree tree1(3);
+  // test doTest;
+  // doTest.testInsertion(tree1, 1);
+  // cout << endl;
+  // tree1.printTree(tree1.getRoot());
+  // cout << endl;
+  // tree1.deletion(20);
+  // cout << endl;
+  // tree1.printTree(tree1.getRoot());
+  // tree1.deletion(40);
   // return 0;

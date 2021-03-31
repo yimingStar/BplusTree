@@ -160,7 +160,7 @@ bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
   auto childIt = parent->getChildPointers().begin(); 
   for(; childIt!=parent->getChildPointers().end(); childIt++) {
     if(*childIt == deficient) {
-      if(childIt != prev(parent->getChildPointers().end())) {
+      if(next(childIt) != parent->getChildPointers().end()) {
         rightSib = *next(childIt);
       }
       if(childIt != parent->getChildPointers().begin()) {
@@ -170,7 +170,6 @@ bool bPlusTree::borrow(treeNode* parent, treeNode* deficient) {
     }
   } 
   
-  cout << "[bPlusTree::borrow] right sibling size: " << rightSib->getKeyPairs().size() << endl; 
   if(rightSib != NULL && rightSib->getKeyPairs().size() - 1 >= minPairsSize) {
     cout << "[bPlusTree::borrow] eligible borrow from right sibling" << endl; 
     // eligible borrow from right sibling
@@ -228,7 +227,7 @@ bool bPlusTree::combine(treeNode* parent, treeNode* deficient) {
   auto childIt = parent->getChildPointers().begin(); 
   for(; childIt!=parent->getChildPointers().end(); childIt++) {
     if(*childIt == deficient) {
-      if(childIt != prev(parent->getChildPointers().end())) {
+      if(next(childIt) != parent->getChildPointers().end()) {
         rightSib = *next(childIt);
       }
       if(childIt != parent->getChildPointers().begin()) {
