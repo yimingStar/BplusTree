@@ -32,6 +32,13 @@ void test::testInsertion(bPlusTree &tree, int version) {
     tree.insertion(30,3.0);
     tree.insertion(20,2.0);
   }
+  else if(version == 3) {
+    for(int i=1; i<=5; i++) {
+      tree.insertion(i*10, i);
+      tree.printTree(tree.getRoot());
+    }
+  }
+  
 }
 
 void test::testRangeSearch(bPlusTree &tree) {

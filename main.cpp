@@ -10,11 +10,12 @@ using namespace std;
 int main() {
   bPlusTree tree1(3);
   test doTest;
-  doTest.testInsertion(tree1, 1);
+  doTest.testInsertion(tree1, 3);
   cout << endl;
-  tree1.deletion(20);
-  tree1.deletion(40);
-  tree1.deletion(10);
+  tree1.printTree(tree1.getRoot());
+  cout << endl;
+  tree1.deletion(30);
+  cout << endl;
   tree1.printTree(tree1.getRoot());
   return 0;
 }

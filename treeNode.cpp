@@ -81,6 +81,7 @@ pair<bool, double> treeNode::searchLeafNode(int key) {
  */
 pair<int, treeNode*> treeNode::insertIndexNode(treeNode* targetNode, pair<int, double> insertPair) {
   targetNode->keyPairs.insert(insertPair);
+
   if(targetNode->keyPairs.size() < degree) {
     return {false, NULL};
   }
@@ -91,13 +92,16 @@ pair<int, treeNode*> treeNode::insertIndexNode(treeNode* targetNode, pair<int, d
    *        this new node also will be return as the right child of middle key
    */
   treeNode *newIndexNode = new treeNode(targetNode->degree, 0, false);
-  map<int, double>::iterator midKey = targetNode->getMiddleKey();
+  map<int, double>::iterator midIt = targetNode->getMiddleKey();
   vector<treeNode*>::iterator midChild = targetNode -> getMiddleChild();
-  cout << "[treeNode::insertIndexNode] SPLIT INDEX node by key: " << midKey->first << endl;
-  
-  copyAndDeleteKeys(newIndexNode, midKey, targetNode->keyPairs.end());
+
+  int midKey = midIt->first;
+  cout << "[treeNode::insertIndexNode] SPLIT INDEX node by key: " << midKey << endl;
+
+  copyAndDeleteKeys(newIndexNode, midIt, targetNode->keyPairs.end());
   copyAndDeleteChilds(newIndexNode, midChild, targetNode->childPointers.end());
-  return {midKey->first, newIndexNode};
+
+  return {midKey, newIndexNode};
 }
 
 /**
@@ -137,10 +141,12 @@ pair<int, treeNode*> treeNode::insertLeafNode(
   }
   leafList.insert(next(leafInsertPoint), newLeaf);
   
-  map<int, double>::iterator midKey = targetNode->getMiddleKey();
-  cout << "[treeNode::insertLeafNode] SPLIT LEAF node by key: " << midKey->first << endl;
-  copyAndDeleteKeys(newLeaf, midKey, keyPairs.end());
-  return {midKey->first, newLeaf};
+  map<int, double>::iterator midIt = targetNode->getMiddleKey();
+  int midKey = midIt->first;
+
+  cout << "[treeNode::insertLeafNode] SPLIT LEAF node by key: " << midKey << endl;
+  copyAndDeleteKeys(newLeaf, midIt, keyPairs.end());
+  return {midKey, newLeaf};
 }
 
 /**

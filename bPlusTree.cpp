@@ -123,7 +123,7 @@ int bPlusTree::deletion(int key) {
   bool hasBorrow = false;
   bool hasCombine = false;
   
-  // 1. LEAF borrow from siblings
+  // 1. node borrow from siblings
   if(isDeficient) {
     cout << "[bPlusTree::deletion] target LEAF deficient" <<  endl; 
     if(tracePath.size() == 0) {
@@ -136,14 +136,40 @@ int bPlusTree::deletion(int key) {
     if(hasBorrow) isDeficient = false;
   }
 
-  // 2. combine with siblings
   while(isDeficient) {
-    hasCombine = combine(parent, targetNode);
-    if(hasCombine) {
-
+    // 1. node borrow from siblings
+    cout << "[bPlusTree::deletion] target Node deficient" <<  endl; 
+    if(tracePath.size() == 0) {
+      // deficient node is root 
+      cout << "[bPlusTree::deletion] target Node is root" <<  endl; 
+      if(!targetNode->getIsLeaf()) {
+        cout << "[bPlusTree::deletion] root is empty index node, remove it" <<  endl;
+        root = *(targetNode->getChildPointers().begin());
+      }
+      return 0;
     }
 
-    break;
+    parent = tracePath.back();
+    hasBorrow = borrow(parent, targetNode);
+    if(hasBorrow) {
+      isDeficient = false;
+      break;
+    }
+
+    // 2. combine with siblings
+    hasCombine = combine(parent, targetNode);
+    cout << "[bPlusTree::deletion] hasCombine " << hasCombine <<  endl;
+    if(hasCombine) {
+      int keyPairSize = parent->getKeyPairs().size();
+      cout << "[bPlusTree::deletion] parent keyPairSize: " << keyPairSize <<  endl;
+      if(keyPairSize != 0 && keyPairSize >= minPairsSize) {
+        isDeficient = false;
+        break;
+      }
+    }
+
+    targetNode = parent;
+    tracePath.pop_back();
   }
 
   return 0;
@@ -267,7 +293,7 @@ bool bPlusTree::combine(treeNode* parent, treeNode* deficient) {
     keyIndex = distance(parent->getChildPointers().begin(), targetNodeIt) - 1;
     adjustKey = next(adjustKey, keyIndex);
 
-    // 
+    // Remove parent invalid key pairs -> MIGHT cause DEFICIENT 
     parent->getKeyPairs().erase(adjustKey->first);
     
     // Remove LEAF in childPairsList
