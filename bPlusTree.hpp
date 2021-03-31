@@ -24,6 +24,7 @@ class bPlusTree {
     bool borrowFromIndex(treeNode* parent, treeNode *deficient);
     bool combineWithLeaf(treeNode* parent, treeNode *deficient);
     bool combineWithIndex(treeNode* parent, treeNode *deficient);
+    int getInvalidParentKeyIdx(treeNode* parent, std::vector<treeNode*>::iterator changNodeIt);
 
     int search(int key);
     int searchRange(int start, int finish);

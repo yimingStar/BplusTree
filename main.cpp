@@ -12,8 +12,16 @@ int main() {
   test doTest;
   doTest.testInsertion(tree1, 4);
   cout << endl;
+  tree1.printTree(tree1.getRoot());
+  cout << endl;
   tree1.deletion(20);
+  cout << endl;
+  tree1.printTree(tree1.getRoot());
+
+  cout << endl;
   tree1.deletion(30);
+  cout << endl;
+  tree1.printLeafList();
   cout << endl;
   tree1.printTree(tree1.getRoot());
   return 0;

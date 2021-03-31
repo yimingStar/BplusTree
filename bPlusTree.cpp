@@ -199,97 +199,6 @@ int bPlusTree::deletion(int key) {
 
   return 0;
 }
-bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
-  cout << "[bPlusTree::combineWithIndex] check if we can combine" << endl;
-  treeNode *rightSib = NULL;
-  treeNode *leftSib = NULL;
-
-  bool rightCombine = false;
-  bool leftCombine = false;
-
-  auto childIt = parent->getChildPointers().begin(); 
-  for(; childIt!=parent->getChildPointers().end(); childIt++) {
-    if(*childIt == deficient) {
-      if(next(childIt) != parent->getChildPointers().end()) {
-        rightSib = *next(childIt);
-      }
-      if(childIt != parent->getChildPointers().begin()) {
-        leftSib = *prev(childIt);
-      }
-      break;
-    }
-  }
-
-  if(rightSib != NULL) {
-    // combine with right
-    rightCombine = true;
-  }
-  else if(leftSib != NULL) {
-    // combine with left
-    leftCombine = true;
-  }
-  /**
-   * @brief 
-   *  1. remove key x from parent
-   *  2. insert x key to deficient
-   *  3. copy the donator into the deficient
-   *  4. Remove donator from childPairs list, free donator
-   */
-  bool hasCombine = (rightCombine|leftCombine);
-  if(hasCombine) {
-    int keyIndex = 0;
-    auto adjustKey = parent->getKeyPairs().begin();
-  
-    treeNode *targetNode = rightSib;
-    auto targetNodeIt = next(childIt);
- 
-    if(leftCombine) {
-      targetNode = deficient;
-      targetNodeIt = childIt;
-    }
-
-    keyIndex = distance(parent->getChildPointers().begin(), targetNodeIt) - 1;
-    adjustKey = next(adjustKey, keyIndex);
-
-    // get adjustKey from parent
-    parent->getKeyPairs().erase(adjustKey->first);
-    deficient->getKeyPairs().insert({adjustKey->first, adjustKey->second});
-    // remove the donator from childPairs list
-  
-    /**
-     * @brief 
-     *  3. copy the donator into the deficient
-     *  4. remove the donator
-     */
-    if(rightCombine) {
-      auto donateValue = rightSib->getKeyPairs().begin();
-      for(;donateValue != rightSib->getKeyPairs().end(); donateValue++) {
-        deficient->getKeyPairs().insert({donateValue->first, donateValue->second});
-      }
-      auto donateChild = rightSib->getChildPointers().begin();
-      for(;donateChild != rightSib->getChildPointers().end(); donateChild++) {
-        deficient->getChildPointers().push_back(*donateChild);
-      }
-      parent->getChildPointers().erase(next(childIt));
-      delete rightSib;
-    }
-    else if(leftCombine) {    
-      auto donateValue =  prev(leftSib->getKeyPairs().end());
-      for(;donateValue != rightSib->getKeyPairs().end(); donateValue++) {
-        deficient->getKeyPairs().insert({donateValue->first, donateValue->second});
-      }
-      
-      auto donateChild = leftSib->getChildPointers().begin();
-      for(;donateChild != leftSib->getChildPointers().end(); donateChild++) {
-        deficient->getChildPointers().insert(deficient->getChildPointers().begin(), *donateChild);
-      }
-      parent->getChildPointers().erase(prev(childIt));
-      delete leftSib;
-    }
-  }
-
-  return hasCombine;
-}
 
 bool bPlusTree::borrowFromIndex(treeNode* parent, treeNode* deficient) {
   cout << "[bPlusTree::borrowFromIndex] check if we can borrow" << endl; 
@@ -326,6 +235,7 @@ bool bPlusTree::borrowFromIndex(treeNode* parent, treeNode* deficient) {
    *  3. remove key y from donator=(left, right sibling)
    *  4. insert y to parent.
    *  5. transplant the invalid child to deficient node
+   *  6. remove invalid child from donator child list
    */
   bool hasBorrow = (rightBorrow|leftBorrow);
   if(hasBorrow) {
@@ -352,6 +262,7 @@ bool bPlusTree::borrowFromIndex(treeNode* parent, treeNode* deficient) {
      *  3. remove key y from donator=(left, right sibling)
      *  4. insert y to parent.
      *  5. transplant the invalid child to deficient node
+     *  6. remove invalid child from donator child list
      */
     if(rightBorrow) {
       auto minValue = rightSib->getKeyPairs().begin();
@@ -361,6 +272,7 @@ bool bPlusTree::borrowFromIndex(treeNode* parent, treeNode* deficient) {
 
       auto invalidChild = rightSib->getChildPointers().begin();
       deficient->getChildPointers().push_back(*invalidChild);
+      rightSib->getChildPointers().erase(invalidChild);
     }
     else if(leftBorrow) {
       auto maxValue = prev(leftSib->getKeyPairs().end());
@@ -370,6 +282,7 @@ bool bPlusTree::borrowFromIndex(treeNode* parent, treeNode* deficient) {
       
       auto invalidChild = prev(leftSib->getChildPointers().end());
       deficient->getChildPointers().insert(deficient->getChildPointers().begin(), *invalidChild);
+      leftSib->getChildPointers().erase(invalidChild);
     }
   }
 
@@ -442,6 +355,105 @@ bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
   return hasBorrow;
 } 
 
+bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
+  cout << "[bPlusTree::combineWithIndex] check if we can combine" << endl;
+  treeNode *rightSib = NULL;
+  treeNode *leftSib = NULL;
+
+  bool rightCombine = false;
+  bool leftCombine = false;
+
+  auto childIt = parent->getChildPointers().begin(); 
+  for(; childIt!=parent->getChildPointers().end(); childIt++) {
+    if(*childIt == deficient) {
+      if(next(childIt) != parent->getChildPointers().end()) {
+        rightSib = *next(childIt);
+      }
+      if(childIt != parent->getChildPointers().begin()) {
+        leftSib = *prev(childIt);
+      }
+      break;
+    }
+  }
+
+  if(rightSib != NULL) {
+    // combine with right
+    rightCombine = true;
+  }
+  else if(leftSib != NULL) {
+    // combine with left
+    leftCombine = true;
+  }
+  /**
+   * @brief 
+   *  1. remove key x from parent
+   *  2. insert x key to deficient
+   *  3. copy the donator into the deficient
+   *  4. Remove donator from childPairs list, free donator
+   */
+  bool hasCombine = (rightCombine|leftCombine);
+  cout << "[bPlusTree::combineWithIndex] rightCombine:" << rightCombine << endl;
+  cout << "[bPlusTree::combineWithIndex] leftCombine:" << leftCombine << endl;
+  if(hasCombine) {
+    int keyIndex = 0;
+    if(rightCombine) {
+      keyIndex = getInvalidParentKeyIdx(parent, next(childIt));
+    }
+    else if(leftCombine) {
+      keyIndex = getInvalidParentKeyIdx(parent, childIt);
+    }
+    auto adjustKey = parent->getKeyPairs().begin();
+    adjustKey = next(adjustKey, keyIndex);
+
+    // get adjustKey from parent
+    parent->getKeyPairs().erase(adjustKey->first);
+    deficient->getKeyPairs().insert({adjustKey->first, adjustKey->second});
+    // remove the donator from childPairs list
+
+    /**
+     * @brief 
+     *  3. copy the donator into the deficient
+     *  4. remove the donator
+     */
+    if(rightCombine) {
+
+      auto donateValue = rightSib->getKeyPairs().begin();
+      for(;donateValue != rightSib->getKeyPairs().end(); donateValue++) {
+        deficient->getKeyPairs().insert({donateValue->first, donateValue->second});
+      }
+
+      auto donateChild = rightSib->getChildPointers().begin();
+
+
+      cout << deficient->getChildPointers().size() << endl;
+      cout << rightSib->getChildPointers().size() << endl;
+      for(;donateChild != rightSib->getChildPointers().end(); donateChild++) {
+        deficient->getChildPointers().push_back(*donateChild);
+        cout << *donateChild << endl;
+      }
+
+      parent->getChildPointers().erase(next(childIt));
+      delete rightSib;
+    }
+    else if(leftCombine) {    
+      
+      auto donateValue = leftSib->getKeyPairs().begin();
+      for(;donateValue != leftSib->getKeyPairs().end(); donateValue++) {
+        deficient->getKeyPairs().insert({donateValue->first, donateValue->second});
+      }
+      
+      auto donateChild = leftSib->getChildPointers().begin();
+      for(;donateChild != leftSib->getChildPointers().end(); donateChild++) {
+        deficient->getChildPointers().insert(deficient->getChildPointers().begin(), *donateChild);
+      }
+
+      parent->getChildPointers().erase(prev(childIt));
+      delete leftSib;
+    }
+  }
+
+  return hasCombine;
+}
 
 bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
   cout << "[bPlusTree::combineWithLeaf] check if we can combine" << endl; 
@@ -495,7 +507,8 @@ bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
 
     keyIndex = distance(parent->getChildPointers().begin(), targetNodeIt) - 1;
     adjustKey = next(adjustKey, keyIndex);
-
+    
+    
     // Remove parent invalid key pairs -> MIGHT cause DEFICIENT 
     parent->getKeyPairs().erase(adjustKey->first);
     
@@ -517,6 +530,11 @@ bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
   }
 
   return hasCombine;
+}
+
+int bPlusTree::getInvalidParentKeyIdx(
+  treeNode* parent, vector<treeNode*>::iterator changNodeIt) {
+  return distance(parent->getChildPointers().begin(), changNodeIt) - 1;;
 }
 
 /**
