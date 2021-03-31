@@ -35,10 +35,15 @@ void test::testInsertion(bPlusTree &tree, int version) {
   else if(version == 3) {
     for(int i=1; i<=5; i++) {
       tree.insertion(i*10, i);
-      tree.printTree(tree.getRoot());
+      // tree.printTree(tree.getRoot());
     }
   }
-  
+  else if(version == 4) {
+    for(int i=1; i<=6; i++) {
+      tree.insertion(i*10, i);
+      // tree.printTree(tree.getRoot());
+    }
+  }
 }
 
 void test::testRangeSearch(bPlusTree &tree) {

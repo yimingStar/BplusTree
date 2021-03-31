@@ -20,8 +20,10 @@ class bPlusTree {
     int insertion(int key, double value);
     
     int deletion(int key);
-    bool borrow(treeNode* parent, treeNode *deficient);
-    bool combine(treeNode* parent, treeNode *deficient);
+    bool borrowFromLeaf(treeNode* parent, treeNode *deficient);
+    bool borrowFromIndex(treeNode* parent, treeNode *deficient);
+    bool combineWithLeaf(treeNode* parent, treeNode *deficient);
+    bool combineWithIndex(treeNode* parent, treeNode *deficient);
 
     int search(int key);
     int searchRange(int start, int finish);
