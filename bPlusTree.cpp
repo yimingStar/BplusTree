@@ -405,11 +405,11 @@ bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
     auto adjustKey = parent->getKeyPairs().begin();
     adjustKey = next(adjustKey, keyIndex);
 
-    // get adjustKey from parent
+    // Remove parent adjustKey pair -> MIGHT cause DEFICIENT 
     parent->getKeyPairs().erase(adjustKey->first);
+    // Insert this adjustKey pair into deficient node
     deficient->getKeyPairs().insert({adjustKey->first, adjustKey->second});
-    // remove the donator from childPairs list
-
+    
     /**
      * @brief 
      *  3. copy the donator into the deficient
@@ -423,13 +423,8 @@ bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
       }
 
       auto donateChild = rightSib->getChildPointers().begin();
-
-
-      cout << deficient->getChildPointers().size() << endl;
-      cout << rightSib->getChildPointers().size() << endl;
       for(;donateChild != rightSib->getChildPointers().end(); donateChild++) {
         deficient->getChildPointers().push_back(*donateChild);
-        cout << *donateChild << endl;
       }
 
       parent->getChildPointers().erase(next(childIt));
@@ -479,13 +474,11 @@ bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
   if(rightSib != NULL) {
     // combine with right
     rightSib->getKeyPairs().insert(deficient->getKeyPairs().begin(), deficient->getKeyPairs().end());
-    deficient->getKeyPairs().clear();
     rightCombine = true;
   }
   else if(leftSib != NULL) {
     // combine with left
     leftSib->getKeyPairs().insert(deficient->getKeyPairs().begin(), deficient->getKeyPairs().end());
-    deficient->getKeyPairs().clear();
     leftCombine = true;
   }
 
@@ -508,7 +501,6 @@ bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
     keyIndex = distance(parent->getChildPointers().begin(), targetNodeIt) - 1;
     adjustKey = next(adjustKey, keyIndex);
     
-    
     // Remove parent invalid key pairs -> MIGHT cause DEFICIENT 
     parent->getKeyPairs().erase(adjustKey->first);
     
@@ -524,7 +516,7 @@ bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
       }
     }
 
-    // Free space from pointer
+    // Free deficient node
     delete deficient;
     deficient = NULL; 
   }
