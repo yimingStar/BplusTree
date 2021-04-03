@@ -9,14 +9,11 @@ using namespace std;
  * 2. [Important] Output the result into output.txt
 */
 int main() {
-  
-  streambuf *psbuf, *backup; 
-  ofstream result;
-  result.open("output_file.txt");
-  // backup = std::cout.rdbuf();   
-  psbuf = result.rdbuf();
   // assign streambuf to // cout
-  cout.rdbuf(psbuf);  
+
+  std::ofstream out("output_file.txt");
+  std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
+  std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
 
   bPlusTree tree(3);
   // insertion
@@ -24,10 +21,11 @@ int main() {
     tree.insertion(i*10, i);
     // tree.printTree(tree.getRoot());
   }
-  // cout<< endl;
-  // tree.printTree(tree.getRoot());
-  // tree.printLeafList();
-  // cout<< endl;
+
+  cout<< endl;
+  tree.printTree(tree.getRoot());
+  tree.printLeafList();
+  cout<< endl;
 
   // search 
   tree.search(10);
@@ -54,13 +52,8 @@ int main() {
   // delete right index combine
 
   // delete left index combine 
-
-  result.close();
   return 0;
 }
-
-// test m = 3
-
 
 // test 6 delete
   // bPlusTree tree1(3);
