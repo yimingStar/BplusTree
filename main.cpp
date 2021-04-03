@@ -1,94 +1,92 @@
 #include <iostream>
 #include <fstream>
+#include <string.h>
+using namespace std;
+
 #include "bPlusTree.hpp"
 #include "test.hpp"
-using namespace std;
- 
-/**
- * 1. The input line read from the file in same directory
- * 2. [Important] Output the result into output.txt
-*/
-int main() {
-  // assign streambuf to // cout
+#include "constant.hpp"
 
-  std::ofstream out("output_file.txt");
-  std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
-  std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
-
-  bPlusTree tree(3);
-  // insertion
-  for(int i=1; i<=9; i++) {
-    tree.insertion(i*10, i);
-    // tree.printTree(tree.getRoot());
+void executeCmd(vector<string> &cmdSplitVec, bPlusTree *tree) {
+  for(auto t: cmdSplitVec) {
+    // cout << t << "|"; 
   }
+  // cout << endl;
 
-  cout<< endl;
-  tree.printTree(tree.getRoot());
-  tree.printLeafList();
-  cout<< endl;
-
-  // search 
-  tree.search(10);
-  tree.search(100);
-  // searchRange
-  tree.searchRange(10, 50);
-  tree.searchRange(0, 20);
-  // delete right leaf borrow
-  // tree.deletion(70);
-  
-  //tree.printTree(tree.getRoot());
-  //tree.printLeafList();
-
-  // delete left leaf borrow
-  
-  // delete right leaf combine
-  
-  // delete left leaf combine
-  
-  // delete right index borrow
-
-  // delete left index borrow 
-  
-  // delete right index combine
-
-  // delete left index combine 
-  return 0;
+  string cmd = cmdSplitVec[0];
+  // cout << cmd << endl;
+  if(cmd == initCmd) {
+    // cout << cmdSplitVec[1] << endl;
+    int degree = stoi(cmdSplitVec[1]);
+    tree->init(degree);
+  }
+  else if (cmd == searchCmd) {
+    if(cmdSplitVec.size() == searchParCount) {
+      // cout << cmdSplitVec[1] << endl;
+      int key = stoi(cmdSplitVec[1]);
+      tree->search(key);
+    }
+    else {
+      // cout << cmdSplitVec[1] << endl;
+      // cout << cmdSplitVec[2] << endl;
+      int start = stoi(cmdSplitVec[1]);
+      int end = stoi(cmdSplitVec[2]);
+      tree->searchRange(start, end);
+    }
+  }
+  else if(cmd == insertCmd) {
+    // cout << cmdSplitVec[1] << endl;
+    // cout << cmdSplitVec[2] << endl;
+    int key = stoi(cmdSplitVec[1]);
+    double value = stof(cmdSplitVec[2]);
+    tree->insertion(key, value);
+  }
+  else if(cmd == deleteCmd) {
+    // cout << cmdSplitVec[1] << endl;
+    int key = stoi(cmdSplitVec[1]);
+    tree->deletion(key);
+  }
 }
 
-// test 6 delete
-  // bPlusTree tree1(3);
-  // test doTest;
-  // doTest.testInsertion(tree1, 1);
-  // // cout<< endl;
-  // tree1.printTree(tree1.getRoot());
-  // // cout<< endl;
-  // tree1.deletion(20);
-  // // cout<< endl;
-  // tree1.printTree(tree1.getRoot());
-  // tree1.deletion(40);
-  // tree1.printTree(tree1.getRoot());
-  // tree1.deletion(10);
-  // tree1.printTree(tree1.getRoot());
-  // return 0;
+vector<string> splitCmd(string line) {
+  vector<string> cmdSplitVec;
+  size_t prev = 0, pos;
+  while((pos = line.find_first_of("(,) ", prev)) != string::npos){
+      string sub = line.substr(prev, pos-prev);
+      if(sub.find_first_not_of(' ') != std::string::npos) {
+        cmdSplitVec.push_back(sub);
+      }
+      prev = pos+1;
+  }
+  return cmdSplitVec;
+}
 
-// test delete - right index borrow
-  // bPlusTree tree1(3);
-  // test doTest;
-  // doTest.testInsertion(tree1, 3);
-  // // cout<< endl;
-  // tree1.printTree(tree1.getRoot());
-  // tree1.deletion(20);
-  // // cout<< endl;
-  // tree1.printTree(tree1.getRoot());
-  // return 0;
+int main(int argc, char** argv) {
+  // check input name is in agrv
+  if(argc < 2) {
+    // cout << "[ERROR] missing input file" << endl;
+    return -1;
+  }
 
-// test delete - right index combine
-  // bPlusTree tree1(3);
-  // test doTest;
-  // doTest.testInsertion(tree1, 4);
-  // // cout<< endl;
-  // tree1.deletion(20);
-  // tree1.deletion(30);
-  // // cout<< endl;
-  // tree1.printTree(tree1.getRoot());
-  // return 0;
+  string inputFileName = argv[1];
+  string line;
+  ifstream inputFile(inputFileName);
+
+  /**
+   * @brief redirect cout to output_file.txt!
+   */
+  std::ofstream out("output_file.txt");
+  std::cout.rdbuf(out.rdbuf()); 
+
+  static vector<string> splitResult;
+  bPlusTree *tree = new bPlusTree(); 
+
+  if(inputFile.is_open()) {
+    while(getline(inputFile, line)) {
+      splitResult = splitCmd(line);
+      executeCmd(splitResult, tree);
+    }
+    inputFile.close();
+  } 
+  return 0;
+}

@@ -16,7 +16,10 @@ class bPlusTree {
     std::vector<treeNode*> tracePath;
     std::list<treeNode*> leafList;
   public:
+    bPlusTree();
     bPlusTree(int m);
+    void init(int m);
+
     int insertion(int key, double value);
     
     int deletion(int key);

@@ -11,11 +11,23 @@ using namespace std;
  * =====================
 */
 /**
- * @brief Construct a new b Plus Tree::b Plus Tree object
+ * @brief Construct or init tree
  * 
  * @param m 
  */
+bPlusTree::bPlusTree() {
+  degree = -1;
+  minPairsSize = -1;
+  root = NULL;
+}
+
 bPlusTree::bPlusTree(int m) {
+  degree = m;
+  minPairsSize = (m+1)/2 - 1;
+  root = NULL;
+}
+
+void bPlusTree::init(int m) {
   degree = m;
   minPairsSize = (m+1)/2 - 1;
   root = NULL;
@@ -35,7 +47,7 @@ int bPlusTree::getTreeDegree() {
  * @return int - {0} = success, {-1} = failed
  */
 int bPlusTree::insertion(int key, double value) {
-  cout << "[bPlusTree::insertion] insert (key, value) = (" << key << "," << value  << ")" << endl;
+  // cout << "[bPlusTree::insertion] insert (key, value) = (" << key << "," << value  << ")" << endl;
 
   /**
    * No need to search the tree first (the insert key value has no duplication) 
@@ -51,7 +63,7 @@ int bPlusTree::insertion(int key, double value) {
   pair<int, treeNode*> isOverfull = targetLeaf->insertLeafNode(targetLeaf, make_pair(key, value), leafList);
   
   if(isOverfull.second == NULL) {
-    cout << "[bPlusTree::insertion] overfull did not occurs" << endl;
+    // cout << "[bPlusTree::insertion] overfull did not occurs" << endl;
     return 0;
   }
 
@@ -91,7 +103,7 @@ int bPlusTree::insertion(int key, double value) {
     childPointer.insert(next(childit+k), newLeaf);
     tracePath.pop_back();
     
-    cout << "[bPlusTree::insertion] traceback parent indexNode: " << tIndexNode << endl;
+    // cout << "[bPlusTree::insertion] traceback parent indexNode: " << tIndexNode << endl;
     int bottomUpkey = isOverfull.first;
     isOverfull = tIndexNode->insertIndexNode(tIndexNode, make_pair(bottomUpkey, defaultIndexValue));
   }
@@ -106,7 +118,7 @@ int bPlusTree::insertion(int key, double value) {
  * @return int 
  */
 int bPlusTree::deletion(int key) {
-  cout << "[bPlusTree::deletion] delete key: " << key <<", minPairsSize: " << minPairsSize << endl; 
+  // cout << "[bPlusTree::deletion] delete key: " << key <<", minPairsSize: " << minPairsSize << endl; 
   treeNode *targetLeaf = searchLeaf(key);
   if(targetLeaf == NULL) {
     return -1;
@@ -127,11 +139,11 @@ int bPlusTree::deletion(int key) {
   bool hasBorrow = false;
   bool hasCombine = false;
     
-  cout << "[bPlusTree::deletion] target LEAF deficient" <<  endl;
+  // cout << "[bPlusTree::deletion] target LEAF deficient" <<  endl;
   // LEAF is root
   if(tracePath.size() == 0) {
     // deficient LEAF is root 
-    cout << "[bPlusTree::deletion] target LEAF is root" <<  endl;
+    // cout << "[bPlusTree::deletion] target LEAF is root" <<  endl;
     isDeficient = false; 
   }
 
@@ -141,7 +153,7 @@ int bPlusTree::deletion(int key) {
   parent = tracePath.back();
   hasBorrow = borrowFromLeaf(parent, targetLeaf);
   if(hasBorrow) {
-    cout << "[bPlusTree::deletion] target LEAF is borrow SUCCESS" <<  endl;
+    // cout << "[bPlusTree::deletion] target LEAF is borrow SUCCESS" <<  endl;
     isDeficient = false;
   }
   
@@ -151,7 +163,7 @@ int bPlusTree::deletion(int key) {
   if(hasCombine) {
     int keyPairSize = parent->getKeyPairs().size();
     if(keyPairSize != 0 && keyPairSize >= minPairsSize) {
-      cout << "[bPlusTree::deletion] target LEAF combine SUCCESS" <<  endl;
+      // cout << "[bPlusTree::deletion] target LEAF combine SUCCESS" <<  endl;
       isDeficient = false;
     }
   }
@@ -161,12 +173,12 @@ int bPlusTree::deletion(int key) {
   // INDEX is deficient
   if(!isDeficient) return 0;
   while(isDeficient) {
-    cout << "[bPlusTree::deletion] target INDEX node is deficient" <<  endl;
+    // cout << "[bPlusTree::deletion] target INDEX node is deficient" <<  endl;
     
     // INDEX is root
     if(tracePath.size() == 0) {
       if(targetIndex->getKeyPairs().empty()) {
-        cout << "[bPlusTree::deletion] target INDEX node is root, remove it" <<  endl;
+        // cout << "[bPlusTree::deletion] target INDEX node is root, remove it" <<  endl;
         root = *(targetIndex->getChildPointers().begin());
         delete targetIndex;
       }
@@ -177,7 +189,7 @@ int bPlusTree::deletion(int key) {
     parent = tracePath.back();
     hasBorrow = borrowFromIndex(parent, targetIndex);
     if(hasBorrow) {
-      cout << "[bPlusTree::deletion] target INDEX borrow SUCCESS" <<  endl;
+      // cout << "[bPlusTree::deletion] target INDEX borrow SUCCESS" <<  endl;
       isDeficient = false;
     }
 
@@ -188,7 +200,7 @@ int bPlusTree::deletion(int key) {
     if(hasCombine) {
       int keyPairSize = parent->getKeyPairs().size();
       if(keyPairSize != 0 && keyPairSize >= minPairsSize) {
-        cout << "[bPlusTree::deletion] target LEAF combine SUCCESS" <<  endl;
+        // cout << "[bPlusTree::deletion] target LEAF combine SUCCESS" <<  endl;
         isDeficient = false;
       }
     }
@@ -201,7 +213,7 @@ int bPlusTree::deletion(int key) {
 }
 
 bool bPlusTree::borrowFromIndex(treeNode* parent, treeNode* deficient) {
-  cout << "[bPlusTree::borrowFromIndex] check if we can borrow" << endl; 
+  // cout << "[bPlusTree::borrowFromIndex] check if we can borrow" << endl; 
   treeNode *rightSib = NULL;
   treeNode *leftSib = NULL;
 
@@ -290,7 +302,7 @@ bool bPlusTree::borrowFromIndex(treeNode* parent, treeNode* deficient) {
 }
 
 bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
-  cout << "[bPlusTree::borrowFromLeaf] check if we can borrow" << endl; 
+  // cout << "[bPlusTree::borrowFromLeaf] check if we can borrow" << endl; 
   treeNode *rightSib = NULL;
   treeNode *leftSib = NULL;
 
@@ -311,7 +323,7 @@ bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
   } 
   
   if(rightSib != NULL && rightSib->getKeyPairs().size() - 1 >= minPairsSize) {
-    cout << "[bPlusTree::borrowFromLeaf] eligible borrow from right sibling" << endl; 
+    // cout << "[bPlusTree::borrowFromLeaf] eligible borrow from right sibling" << endl; 
     // eligible borrow from right sibling
     auto minValue = rightSib->getKeyPairs().begin();
     deficient->getKeyPairs().insert({minValue->first, minValue->second});
@@ -320,7 +332,7 @@ bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
   }
   else if(leftSib != NULL && leftSib->getKeyPairs().size() - 1 >= minPairsSize) {
     // eligible borrow from left sibling
-    cout << "[bPlusTree::borrowFromLeaf] eligible borrow from left sibling" << endl; 
+    // cout << "[bPlusTree::borrowFromLeaf] eligible borrow from left sibling" << endl; 
     auto maxValue = prev(leftSib->getKeyPairs().end());
     deficient->getKeyPairs().insert({maxValue->first, maxValue->second});
     leftSib->getKeyPairs().erase(maxValue);
@@ -356,7 +368,7 @@ bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
 } 
 
 bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
-  cout << "[bPlusTree::combineWithIndex] check if we can combine" << endl;
+  // cout << "[bPlusTree::combineWithIndex] check if we can combine" << endl;
   treeNode *rightSib = NULL;
   treeNode *leftSib = NULL;
 
@@ -392,8 +404,8 @@ bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
    *  4. Remove donator from childPairs list, free donator
    */
   bool hasCombine = (rightCombine|leftCombine);
-  cout << "[bPlusTree::combineWithIndex] rightCombine:" << rightCombine << endl;
-  cout << "[bPlusTree::combineWithIndex] leftCombine:" << leftCombine << endl;
+  // cout << "[bPlusTree::combineWithIndex] rightCombine:" << rightCombine << endl;
+  // cout << "[bPlusTree::combineWithIndex] leftCombine:" << leftCombine << endl;
   if(hasCombine) {
     int keyIndex = 0;
     if(rightCombine) {
@@ -451,7 +463,7 @@ bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
 }
 
 bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
-  cout << "[bPlusTree::combineWithLeaf] check if we can combine" << endl; 
+  // cout << "[bPlusTree::combineWithLeaf] check if we can combine" << endl; 
   treeNode *rightSib = NULL;
   treeNode *leftSib = NULL;
 
@@ -538,7 +550,7 @@ int bPlusTree::getInvalidParentKeyIdx(
  * @return treeNode = the target leaf node
  */
 treeNode* bPlusTree::searchLeaf(int key) {
-  cout << "[bPlusTree::searchLeaf] key: " << key << endl;
+  // cout << "[bPlusTree::searchLeaf] key: " << key << endl;
   tracePath.clear();
   treeNode *targetNode = root;
   
@@ -570,16 +582,16 @@ treeNode* bPlusTree::searchLeaf(int key) {
  * @return int - {0} = success, {-1} = failed 
  */
 int bPlusTree::search(int key) {
-  cout << "[bPlusTree::search] key: " << key << endl;
+  // cout << "[bPlusTree::search] key: " << key << endl;
   treeNode *targetLeaf = searchLeaf(key);
   if(targetLeaf == NULL) {
     // the tree is empty
-    cout << nullStr << endl;
+    // cout << nullStr << endl;
     return -1;
   }
   
   pair<bool, double> result = targetLeaf->searchLeafNode(key);
-  cout << "[projectResult][bPlusTree::search] key: " << key << ", result = ";
+  // cout << "[projectResult][bPlusTree::search] key: " << key << ", result = ";
   if(result.first) {
     cout << result.second << endl;
   }
@@ -590,11 +602,11 @@ int bPlusTree::search(int key) {
 }
 
 int bPlusTree::searchRange(int start, int finish) {
-  cout << "[bPlusTree::searchRange] start: " << start << ", finish: " << finish << endl;
+  // cout << "[bPlusTree::searchRange] start: " << start << ", finish: " << finish << endl;
   treeNode *startLeaf = searchLeaf(start);
   if(startLeaf == NULL) {
     // the tree is empty
-    cout << nullStr << endl;
+    // cout << nullStr << endl;
     return -1;
   }
 
@@ -624,7 +636,7 @@ int bPlusTree::searchRange(int start, int finish) {
     return 0;
   }
 
-  cout << "[projectResult][bPlusTree::searchRange] ";
+  // cout << "[projectResult][bPlusTree::searchRange] ";
   for(int i=0; i<resultKeys.size(); i++) {
     cout << resultKeys[i];
     if(i == resultKeys.size() - 1) {
@@ -641,13 +653,13 @@ int bPlusTree::searchRange(int start, int finish) {
  * 
  */
 void bPlusTree::printLeafList() {
-  cout << "[bPlusTree::printLeafList]" << endl;
+  // cout << "[bPlusTree::printLeafList]" << endl;
   treeNode *node = NULL;
   int idx = 0;
   for(auto it=leafList.begin(); it != leafList.end(); it++, idx++) {
-    cout << "Leaf Index: (" << idx << ") - ";
+    // cout << "Leaf Index: (" << idx << ") - ";
     (*it)->printNodeKeyValue();
-    cout << endl;
+    // cout << endl;
   }
 }
 
@@ -656,17 +668,14 @@ void bPlusTree::printLeafList() {
  * 
  */
 void bPlusTree::printTree(treeNode* root) {
-  cout << "[bPlusTree::printTree] ";
+  // cout << "[bPlusTree::printTree] ";
   if(!root->getIsLeaf()) {
-    cout << "INDEX: ";
+    // cout << "INDEX: ";
   }
   else {
-    cout << "LEAF: ";
+    // cout << "LEAF: ";
   }
   root->printNodeKeyValue();
-  cout << endl;
-  // vector<treeNode*>& childPointer = root->getChildPointers(); 
-  // cout << childPointer.size() << endl;
   // cout << endl;
   if(!root->getIsLeaf()) {
     for(auto it=root->getChildPointers().begin(); it != root->getChildPointers().end(); it++) {
