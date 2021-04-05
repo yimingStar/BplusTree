@@ -4,7 +4,6 @@
 using namespace std;
 
 #include "bPlusTree.hpp"
-#include "test.hpp"
 #include "constant.hpp"
 
 void executeCmd(vector<string> &cmdSplitVec, bPlusTree *tree) {

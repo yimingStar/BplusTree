@@ -6,14 +6,14 @@ using namespace std;
 
 #include "bPlusTree.hpp"
 #include "constant.hpp"
+
 /**
  * Build bPlusTree class
  * =====================
 */
+
 /**
- * @brief Construct or init tree
- * 
- * @param m 
+ * @brief init tree, not setting degree yet
  */
 bPlusTree::bPlusTree() {
   degree = -1;
@@ -323,8 +323,8 @@ bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
   } 
   
   if(rightSib != NULL && rightSib->getKeyPairs().size() - 1 >= minPairsSize) {
-    // cout << "[bPlusTree::borrowFromLeaf] eligible borrow from right sibling" << endl; 
     // eligible borrow from right sibling
+    // cout << "[bPlusTree::borrowFromLeaf] eligible borrow from right sibling" << endl; 
     auto minValue = rightSib->getKeyPairs().begin();
     deficient->getKeyPairs().insert({minValue->first, minValue->second});
     rightSib->getKeyPairs().erase(minValue);
@@ -404,8 +404,6 @@ bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
    *  4. Remove donator from childPairs list, free donator
    */
   bool hasCombine = (rightCombine|leftCombine);
-  // cout << "[bPlusTree::combineWithIndex] rightCombine:" << rightCombine << endl;
-  // cout << "[bPlusTree::combineWithIndex] leftCombine:" << leftCombine << endl;
   if(hasCombine) {
     int keyIndex = 0;
     if(rightCombine) {
@@ -590,8 +588,10 @@ int bPlusTree::search(int key) {
     return -1;
   }
   
+  /**
+   * @brief [IMPORTANT] Project Result
+   */
   pair<bool, double> result = targetLeaf->searchLeafNode(key);
-  // cout << "[projectResult][bPlusTree::search] key: " << key << ", result = ";
   if(result.first) {
     cout << result.second << endl;
   }
@@ -606,7 +606,7 @@ int bPlusTree::searchRange(int start, int finish) {
   treeNode *startLeaf = searchLeaf(start);
   if(startLeaf == NULL) {
     // the tree is empty
-    // cout << nullStr << endl;
+    cout << nullStr << endl;
     return -1;
   }
 
@@ -636,7 +636,9 @@ int bPlusTree::searchRange(int start, int finish) {
     return 0;
   }
 
-  // cout << "[projectResult][bPlusTree::searchRange] ";
+  /**
+   * @brief [IMPORTANT] Project Result
+   */
   for(int i=0; i<resultKeys.size(); i++) {
     cout << resultKeys[i];
     if(i == resultKeys.size() - 1) {

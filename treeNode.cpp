@@ -37,18 +37,14 @@ treeNode::treeNode(int treeDegree, int key, double value, bool insert) {
 
 treeNode* treeNode::searchIndexNode(int key) { 
   assert(!isLeaf);
-  // cout << "[treeNode::searchIndexNode] Number of childs: " << childPointers.size() << endl;
   assert(childPointers.size() > 0); // failed if childPointers = 0
   
   map<int,double>::iterator targetkey = keyPairs.upper_bound(key);
   int k = distance(keyPairs.begin(), keyPairs.upper_bound(key));
   
-  // cout << "[treeNode::searchIndexNode] distance - k:" << k << endl;
   vector<treeNode*>::iterator childIdx = childPointers.begin(); 
   childIdx = childIdx + k;
   treeNode* targetChild = *childIdx;
-  targetChild->printNodeKeyValue();
-  // cout << endl;
   return targetChild;
 }
 
@@ -222,8 +218,6 @@ int treeNode::copyAndDeleteChilds(
 /**
  * @brief delete key, value in leaf node.
  *        if node become deficient; return the broken node
- *        
- * 
  * @param target 
  * @param key 
  * @param leafList 
@@ -264,6 +258,6 @@ vector<treeNode*>& treeNode::getChildPointers() {
  */
 void treeNode::printNodeKeyValue() {
   for(auto it=keyPairs.begin(); it != keyPairs.end(); it++) {
-    // cout << "(" << it->first << "," << it->second << ")";
+    cout << "(" << it->first << "," << it->second << ")";
   }
 }
