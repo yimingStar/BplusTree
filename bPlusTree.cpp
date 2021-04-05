@@ -98,11 +98,10 @@ int bPlusTree::insertion(int key, double value) {
     treeNode *newLeaf = isOverfull.second;
     int newLeafMinKey = prev(newLeaf->getKeyPairs().end())->first;
     
-    int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey));
+    int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey)) - 1;
     vector<treeNode*>::iterator childit = childPointer.begin(); 
-    childPointer.insert(next(childit+k), newLeaf);
+    childPointer.insert(next(childit, k), newLeaf);
     tracePath.pop_back();
-    
     // cout << "[bPlusTree::insertion] traceback parent indexNode: " << tIndexNode << endl;
     int bottomUpkey = isOverfull.first;
     isOverfull = tIndexNode->insertIndexNode(tIndexNode, make_pair(bottomUpkey, defaultIndexValue));
