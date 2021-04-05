@@ -6,14 +6,14 @@ using namespace std;
 
 #include "bPlusTree.hpp"
 #include "constant.hpp"
+
 /**
  * Build bPlusTree class
  * =====================
 */
+
 /**
- * @brief Construct or init tree
- * 
- * @param m 
+ * @brief init tree, not setting degree yet
  */
 bPlusTree::bPlusTree() {
   degree = -1;
@@ -34,12 +34,108 @@ void bPlusTree::init(int m) {
 }
 
 /**
- * @brief 
- * 
- * @return int = tree degree
+ * @brief Traverse to the target leaf where contain the key
+ * 1. if node = LEAF --> just try to find the value
+ * 2. if node = INDEX --> push node stack tracepath; 
+ *    then goes to the correct children to keep on the traversal
+ * @param int = key
+ * @return treeNode = the target leaf node
  */
-int bPlusTree::getTreeDegree() {
- return degree;
+treeNode* bPlusTree::searchLeaf(int key) {
+  // cout << "[bPlusTree::searchLeaf] key: " << key << endl;
+  tracePath.clear();
+  treeNode *targetNode = root;
+  
+  try {
+    while(targetNode != NULL) {
+      if(!targetNode->getIsLeaf()) {
+        /**
+         * @brief Push the index node into path stack, keep on the top down searching
+         */
+        tracePath.push_back(targetNode);
+        targetNode = targetNode->searchIndexNode(key);
+      }
+      else {
+        // leafNode
+        return targetNode;
+      }
+    }
+  }
+  catch(exception& e) {
+    cerr << "exception caught: " << e.what() << '\n';
+  }
+  return targetNode;
+}
+
+int bPlusTree::search(int key) {
+  // cout << "[bPlusTree::search] key: " << key << endl;
+  treeNode *targetLeaf = searchLeaf(key);
+  if(targetLeaf == NULL) {
+    // the tree is empty
+    cout << nullStr << endl;
+    return -1;
+  }
+  
+  /**
+   * @brief [IMPORTANT] Project Result
+   */
+  pair<bool, double> result = targetLeaf->searchLeafNode(key);
+  if(result.first) {
+    cout << result.second << endl;
+  }
+  else {
+    cout << nullStr << endl;
+  }
+  return 0;
+}
+
+int bPlusTree::searchRange(int start, int finish) {
+  // cout << "[bPlusTree::searchRange] start: " << start << ", finish: " << finish << endl;
+  treeNode *startLeaf = searchLeaf(start);
+  if(startLeaf == NULL) {
+    // the tree is empty
+    cout << nullStr << endl;
+    return -1;
+  }
+
+  vector<double> resultKeys;
+
+  bool isInRange = false;
+  bool stopSearching = false;
+  
+  for(auto itLeaf=leafList.begin(); itLeaf != leafList.end(); itLeaf++) {
+    if(*itLeaf == startLeaf || isInRange) {
+      // get starting leaf, or leaf is in range
+      isInRange = true;
+      for(auto itKey=(*itLeaf)->getKeyPairs().begin(); itKey != (*itLeaf)->getKeyPairs().end(); itKey++) {
+        if(itKey->first < start || itKey->first > finish) {
+          // out of range
+          stopSearching = true;
+          break;
+        }
+        resultKeys.push_back(itKey->second);
+      }
+    }
+    if(stopSearching) break;
+  }
+
+  if(resultKeys.empty()) {
+    cout << nullStr << endl;
+    return 0;
+  }
+
+  /**
+   * @brief [IMPORTANT] Project Result
+   */
+  for(int i=0; i<resultKeys.size(); i++) {
+    cout << resultKeys[i];
+    if(i == resultKeys.size() - 1) {
+      break;
+    }
+    cout << ",";
+  }
+  cout << endl;
+  return 0;
 }
 
 /**
@@ -98,11 +194,12 @@ int bPlusTree::insertion(int key, double value) {
     treeNode *newLeaf = isOverfull.second;
     int newLeafMinKey = prev(newLeaf->getKeyPairs().end())->first;
     
-    int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey));
+    // Must add 1 so the child will be behind the compare key
+    // lower_bound will return the exact index of the insert key (coming from below level).
+    int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey)) + 1;
     vector<treeNode*>::iterator childit = childPointer.begin(); 
-    childPointer.insert(next(childit+k), newLeaf);
+    childPointer.insert(next(childit, k), newLeaf);
     tracePath.pop_back();
-    
     // cout << "[bPlusTree::insertion] traceback parent indexNode: " << tIndexNode << endl;
     int bottomUpkey = isOverfull.first;
     isOverfull = tIndexNode->insertIndexNode(tIndexNode, make_pair(bottomUpkey, defaultIndexValue));
@@ -323,8 +420,8 @@ bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
   } 
   
   if(rightSib != NULL && rightSib->getKeyPairs().size() - 1 >= minPairsSize) {
-    // cout << "[bPlusTree::borrowFromLeaf] eligible borrow from right sibling" << endl; 
     // eligible borrow from right sibling
+    // cout << "[bPlusTree::borrowFromLeaf] eligible borrow from right sibling" << endl; 
     auto minValue = rightSib->getKeyPairs().begin();
     deficient->getKeyPairs().insert({minValue->first, minValue->second});
     rightSib->getKeyPairs().erase(minValue);
@@ -404,8 +501,6 @@ bool bPlusTree::combineWithIndex(treeNode* parent, treeNode* deficient) {
    *  4. Remove donator from childPairs list, free donator
    */
   bool hasCombine = (rightCombine|leftCombine);
-  // cout << "[bPlusTree::combineWithIndex] rightCombine:" << rightCombine << endl;
-  // cout << "[bPlusTree::combineWithIndex] leftCombine:" << leftCombine << endl;
   if(hasCombine) {
     int keyIndex = 0;
     if(rightCombine) {
@@ -538,114 +633,16 @@ bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
 
 int bPlusTree::getInvalidParentKeyIdx(
   treeNode* parent, vector<treeNode*>::iterator changNodeIt) {
-  return distance(parent->getChildPointers().begin(), changNodeIt) - 1;;
+  return distance(parent->getChildPointers().begin(), changNodeIt) - 1;
 }
 
 /**
- * @brief Search target leaf node with integer
- * 1. if node = LEAF --> just try to find the value
- * 2. if node = INDEX --> push node stack tracepath; 
- *    then goes to the correct children to keep on the traversal
- * @param int = key
- * @return treeNode = the target leaf node
- */
-treeNode* bPlusTree::searchLeaf(int key) {
-  // cout << "[bPlusTree::searchLeaf] key: " << key << endl;
-  tracePath.clear();
-  treeNode *targetNode = root;
-  
-  try {
-    while(targetNode != NULL) {
-      if(!targetNode->getIsLeaf()) {
-        /**
-         * @brief Push the index node into path stack, keep on the top down searching
-         */
-        tracePath.push_back(targetNode);
-        targetNode = targetNode->searchIndexNode(key);
-      }
-      else {
-        // leafNode
-        return targetNode;
-      }
-    }
-  }
-  catch(exception& e) {
-    cerr << "exception caught: " << e.what() << '\n';
-  }
-  return targetNode;
-}
-
-/**
- * @brief Traverse to the target leaf where fits the key range
+ * @brief [Test]
  * 
- * @param key 
- * @return int - {0} = success, {-1} = failed 
+ * @return int = tree degree
  */
-int bPlusTree::search(int key) {
-  // cout << "[bPlusTree::search] key: " << key << endl;
-  treeNode *targetLeaf = searchLeaf(key);
-  if(targetLeaf == NULL) {
-    // the tree is empty
-    cout << nullStr << endl;
-    return -1;
-  }
-  
-  pair<bool, double> result = targetLeaf->searchLeafNode(key);
-  // cout << "[projectResult][bPlusTree::search] key: " << key << ", result = ";
-  if(result.first) {
-    cout << result.second << endl;
-  }
-  else {
-    cout << nullStr << endl;
-  }
-  return 0;
-}
-
-int bPlusTree::searchRange(int start, int finish) {
-  // cout << "[bPlusTree::searchRange] start: " << start << ", finish: " << finish << endl;
-  treeNode *startLeaf = searchLeaf(start);
-  if(startLeaf == NULL) {
-    // the tree is empty
-    // cout << nullStr << endl;
-    return -1;
-  }
-
-  vector<double> resultKeys;
-
-  bool isInRange = false;
-  bool stopSearching = false;
-  
-  for(auto itLeaf=leafList.begin(); itLeaf != leafList.end(); itLeaf++) {
-    if(*itLeaf == startLeaf || isInRange) {
-      // get starting leaf, or leaf is in range
-      isInRange = true;
-      for(auto itKey=(*itLeaf)->getKeyPairs().begin(); itKey != (*itLeaf)->getKeyPairs().end(); itKey++) {
-        if(itKey->first < start || itKey->first > finish) {
-          // out of range
-          stopSearching = true;
-          break;
-        }
-        resultKeys.push_back(itKey->second);
-      }
-    }
-    if(stopSearching) break;
-  }
-
-  if(resultKeys.empty()) {
-    cout << nullStr << endl;
-    return 0;
-  }
-
-  // cout << "[projectResult][bPlusTree::searchRange] ";
-  for(int i=0; i<resultKeys.size(); i++) {
-    cout << resultKeys[i];
-    if(i == resultKeys.size() - 1) {
-      break;
-    }
-    cout << ",";
-  }
-  cout << endl;
-  return 0;
+int bPlusTree::getTreeDegree() {
+ return degree;
 }
 
 /**

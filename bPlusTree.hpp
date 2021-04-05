@@ -20,6 +20,10 @@ class bPlusTree {
     bPlusTree(int m);
     void init(int m);
 
+    int search(int key);
+    int searchRange(int start, int finish);
+    treeNode* searchLeaf(int key);
+
     int insertion(int key, double value);
     
     int deletion(int key);
@@ -29,9 +33,6 @@ class bPlusTree {
     bool combineWithIndex(treeNode* parent, treeNode *deficient);
     int getInvalidParentKeyIdx(treeNode* parent, std::vector<treeNode*>::iterator changNodeIt);
 
-    int search(int key);
-    int searchRange(int start, int finish);
-    treeNode* searchLeaf(int key);
     /**
      * test functions
      */

@@ -12,4 +12,8 @@ const std::string searchCmd = "Search";
 const int searchParCount = 2; // cmd + start key + end key
 const std::string deleteCmd = "Delete";
 
+// test
+const std::string printLeadCmd = "PrintLeaf";
+const std::string printTreeCmd = "PrintTree";
+
 #endif

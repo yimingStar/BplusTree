@@ -4,7 +4,6 @@
 using namespace std;
 
 #include "bPlusTree.hpp"
-#include "test.hpp"
 #include "constant.hpp"
 
 void executeCmd(vector<string> &cmdSplitVec, bPlusTree *tree) {
@@ -32,6 +31,12 @@ void executeCmd(vector<string> &cmdSplitVec, bPlusTree *tree) {
   else if(cmd == deleteCmd) {
     int key = stoi(cmdSplitVec[1]);
     tree->deletion(key);
+  }
+  else if(cmd == printTreeCmd){
+    tree->printTree(tree->getRoot());
+  }
+  else if(cmd == printLeadCmd){
+    tree->printLeafList();
   }
 }
 
