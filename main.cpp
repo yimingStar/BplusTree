@@ -8,41 +8,28 @@ using namespace std;
 #include "constant.hpp"
 
 void executeCmd(vector<string> &cmdSplitVec, bPlusTree *tree) {
-  for(auto t: cmdSplitVec) {
-    // cout << t << "|"; 
-  }
-  // cout << endl;
-
   string cmd = cmdSplitVec[0];
-  // cout << cmd << endl;
   if(cmd == initCmd) {
-    // cout << cmdSplitVec[1] << endl;
     int degree = stoi(cmdSplitVec[1]);
     tree->init(degree);
   }
   else if (cmd == searchCmd) {
     if(cmdSplitVec.size() == searchParCount) {
-      // cout << cmdSplitVec[1] << endl;
       int key = stoi(cmdSplitVec[1]);
       tree->search(key);
     }
     else {
-      // cout << cmdSplitVec[1] << endl;
-      // cout << cmdSplitVec[2] << endl;
       int start = stoi(cmdSplitVec[1]);
       int end = stoi(cmdSplitVec[2]);
       tree->searchRange(start, end);
     }
   }
   else if(cmd == insertCmd) {
-    // cout << cmdSplitVec[1] << endl;
-    // cout << cmdSplitVec[2] << endl;
     int key = stoi(cmdSplitVec[1]);
     double value = stof(cmdSplitVec[2]);
     tree->insertion(key, value);
   }
   else if(cmd == deleteCmd) {
-    // cout << cmdSplitVec[1] << endl;
     int key = stoi(cmdSplitVec[1]);
     tree->deletion(key);
   }

@@ -586,7 +586,7 @@ int bPlusTree::search(int key) {
   treeNode *targetLeaf = searchLeaf(key);
   if(targetLeaf == NULL) {
     // the tree is empty
-    // cout << nullStr << endl;
+    cout << nullStr << endl;
     return -1;
   }
   
@@ -621,7 +621,7 @@ int bPlusTree::searchRange(int start, int finish) {
       isInRange = true;
       for(auto itKey=(*itLeaf)->getKeyPairs().begin(); itKey != (*itLeaf)->getKeyPairs().end(); itKey++) {
         if(itKey->first < start || itKey->first > finish) {
-          // Out of range
+          // out of range
           stopSearching = true;
           break;
         }
@@ -653,13 +653,13 @@ int bPlusTree::searchRange(int start, int finish) {
  * 
  */
 void bPlusTree::printLeafList() {
-  // cout << "[bPlusTree::printLeafList]" << endl;
+  cout << "[bPlusTree::printLeafList]" << endl;
   treeNode *node = NULL;
   int idx = 0;
   for(auto it=leafList.begin(); it != leafList.end(); it++, idx++) {
-    // cout << "Leaf Index: (" << idx << ") - ";
+    cout << "Leaf Index: (" << idx << ") - ";
     (*it)->printNodeKeyValue();
-    // cout << endl;
+    cout << endl;
   }
 }
 
@@ -668,15 +668,15 @@ void bPlusTree::printLeafList() {
  * 
  */
 void bPlusTree::printTree(treeNode* root) {
-  // cout << "[bPlusTree::printTree] ";
+  cout << "[bPlusTree::printTree] ";
   if(!root->getIsLeaf()) {
-    // cout << "INDEX: ";
+    cout << "INDEX: ";
   }
   else {
-    // cout << "LEAF: ";
+    cout << "LEAF: ";
   }
   root->printNodeKeyValue();
-  // cout << endl;
+  cout << endl;
   if(!root->getIsLeaf()) {
     for(auto it=root->getChildPointers().begin(); it != root->getChildPointers().end(); it++) {
       printTree(*it);
