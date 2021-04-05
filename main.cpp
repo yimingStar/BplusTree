@@ -32,6 +32,12 @@ void executeCmd(vector<string> &cmdSplitVec, bPlusTree *tree) {
     int key = stoi(cmdSplitVec[1]);
     tree->deletion(key);
   }
+  else if(cmd == printTreeCmd){
+    tree->printTree(tree->getRoot());
+  }
+  else if(cmd == printLeadCmd){
+    tree->printLeafList();
+  }
 }
 
 vector<string> splitCmd(string line) {

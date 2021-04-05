@@ -98,7 +98,9 @@ int bPlusTree::insertion(int key, double value) {
     treeNode *newLeaf = isOverfull.second;
     int newLeafMinKey = prev(newLeaf->getKeyPairs().end())->first;
     
-    int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey)) - 1;
+    // Must add 1 so the child will be behind the compare key
+    // lower_bound will return the exact index of the insert key (coming from below level).
+    int k = distance(tIndexNode->getKeyPairs().begin(), tIndexNode->getKeyPairs().lower_bound(newLeafMinKey)) + 1;
     vector<treeNode*>::iterator childit = childPointer.begin(); 
     childPointer.insert(next(childit, k), newLeaf);
     tracePath.pop_back();
