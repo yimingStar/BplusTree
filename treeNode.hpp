@@ -68,7 +68,6 @@ class treeNode {
     std::vector<treeNode*>& getChildPointers();
 
     // debug functions
-    int getNodeNumOfPairs();
     void printNodeKeyValue();
 };
 
