@@ -71,7 +71,9 @@ int bPlusTree::search(int key) {
   // cout << "[bPlusTree::search] key: " << key << endl;
   treeNode *targetLeaf = searchLeaf(key);
   if(targetLeaf == NULL) {
-    // the tree is empty
+    /**
+    * @brief [IMPORTANT] Project Result
+    */
     cout << nullStr << endl;
     return -1;
   }
@@ -93,7 +95,9 @@ int bPlusTree::searchRange(int start, int finish) {
   // cout << "[bPlusTree::searchRange] start: " << start << ", finish: " << finish << endl;
   treeNode *startLeaf = searchLeaf(start);
   if(startLeaf == NULL) {
-    // the tree is empty
+    /**
+    * @brief [IMPORTANT] Project Result
+    */
     cout << nullStr << endl;
     return -1;
   }
@@ -120,7 +124,7 @@ int bPlusTree::searchRange(int start, int finish) {
   }
 
   if(resultKeys.empty()) {
-    cout << nullStr << endl;
+    // cout << nullStr << endl;
     return 0;
   }
 
@@ -457,7 +461,7 @@ bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
     keyIndex = distance(parent->getChildPointers().begin(), targetNodeIt) - 1;
     adjustKey = next(adjustKey, keyIndex);
     parent->getKeyPairs().erase(adjustKey->first);
-    pair<int, double> newKey = {targetNode->getKeyPairs().begin()->first, targetNode->getKeyPairs().begin()->second};
+    pair<int, double> newKey = {targetNode->getKeyPairs().begin()->first, 0};
     parent->getKeyPairs().insert(newKey);
   }
 
@@ -651,13 +655,13 @@ int bPlusTree::getTreeDegree() {
  * 
  */
 void bPlusTree::printLeafList() {
-  cout << "[bPlusTree::printLeafList]" << endl;
+  // cout << "[bPlusTree::printLeafList]" << endl;
   treeNode *node = NULL;
   int idx = 0;
   for(auto it=leafList.begin(); it != leafList.end(); it++, idx++) {
-    cout << "Leaf Index: (" << idx << ") - ";
+    // cout << "Leaf Index: (" << idx << ") - ";
     (*it)->printNodeKeyValue();
-    cout << endl;
+    // cout << endl;
   }
 }
 
