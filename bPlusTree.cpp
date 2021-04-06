@@ -619,6 +619,7 @@ bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
       for(auto itLeaf=leafList.begin(); itLeaf != leafList.end(); itLeaf++) {
         if(*itLeaf == deficient) {
           leafList.erase(itLeaf);
+          break;
         }
       }
     }
