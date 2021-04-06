@@ -36,9 +36,6 @@ treeNode::treeNode(int treeDegree, int key, double value, bool insert) {
 }
 
 treeNode* treeNode::searchIndexNode(int key) { 
-  assert(!isLeaf);
-  assert(childPointers.size() > 0); // failed if childPointers = 0
-  
   map<int,double>::iterator targetkey = keyPairs.upper_bound(key);
   int k = distance(keyPairs.begin(), keyPairs.upper_bound(key));
   
