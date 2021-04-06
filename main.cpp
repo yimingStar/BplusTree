@@ -56,7 +56,7 @@ vector<string> splitCmd(string line) {
 int main(int argc, char** argv) {
   // check input name is in agrv
   if(argc < 2) {
-    // cout << "[ERROR] missing input file" << endl;
+    cout << "[ERROR] missing input file" << endl;
     return -1;
   }
 
@@ -67,8 +67,8 @@ int main(int argc, char** argv) {
   /**
    * @brief redirect cout to output_file.txt!
    */
-  std::ofstream out("output_file.txt");
-  std::cout.rdbuf(out.rdbuf()); 
+  // std::ofstream out("output_file.txt");
+  // std::cout.rdbuf(out.rdbuf()); 
 
   static vector<string> splitResult;
   bPlusTree *tree = new bPlusTree(); 

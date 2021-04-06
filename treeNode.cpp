@@ -81,7 +81,7 @@ pair<int, treeNode*> treeNode::insertIndexNode(treeNode* targetNode, pair<int, d
   if(targetNode->keyPairs.size() < degree) {
     return {false, NULL};
   }
-  // cout << "[treeNode::insertIndexNode] target insertion INSERT node is OVERFULL" << endl;
+  cout << "[treeNode::insertIndexNode] target insertion INSERT node is OVERFULL" << endl;
   
   /**
    * @brief Create new indexNode
@@ -92,7 +92,7 @@ pair<int, treeNode*> treeNode::insertIndexNode(treeNode* targetNode, pair<int, d
   vector<treeNode*>::iterator midChild = targetNode -> getMiddleChild();
 
   int midKey = midIt->first;
-  // cout << "[treeNode::insertIndexNode] SPLIT INDEX node by key: " << midKey << endl;
+  cout << "[treeNode::insertIndexNode] SPLIT INDEX node by key: " << midKey << endl;
 
   copyAndDeleteKeys(newIndexNode, midIt, targetNode->keyPairs.end());
   copyAndDeleteChilds(newIndexNode, midChild, targetNode->childPointers.end());
@@ -120,7 +120,7 @@ pair<int, treeNode*> treeNode::insertLeafNode(
     return {0, NULL};
   }
 
-  // cout << "[treeNode::insertLeafNode] after insertion, LEAF node is OVERFULL" << endl;
+  cout << "[treeNode::insertLeafNode] after insertion, LEAF node is OVERFULL" << endl;
   /**
    * @brief Create new leaf and insert into leafList
    *        this new node also will be return as the right child of middle key
@@ -132,7 +132,7 @@ pair<int, treeNode*> treeNode::insertLeafNode(
   for(auto it=leafList.begin(); it!=leafList.end(); it++)  {
     if(targetNode == *it) {
       leafInsertPoint = it;
-      // cout << "[treeNode::insertLeafNode] get LEAF node in LeafList" << endl;
+      cout << "[treeNode::insertLeafNode] get LEAF node in LeafList" << endl;
     }
   }
   leafList.insert(next(leafInsertPoint), newLeaf);
@@ -140,7 +140,7 @@ pair<int, treeNode*> treeNode::insertLeafNode(
   map<int, double>::iterator midIt = targetNode->getMiddleKey();
   int midKey = midIt->first;
 
-  // cout << "[treeNode::insertLeafNode] SPLIT LEAF node by key: " << midKey << endl;
+  cout << "[treeNode::insertLeafNode] SPLIT LEAF node by key: " << midKey << endl;
   copyAndDeleteKeys(newLeaf, midIt, keyPairs.end());
   return {midKey, newLeaf};
 }
@@ -179,7 +179,7 @@ vector<treeNode*>::iterator treeNode::getMiddleChild() {
  */
 int treeNode::copyAndDeleteKeys(
   treeNode *newNode, map<int, double>::iterator start, map<int, double>::iterator end) {
-  // cout << "[treeNode::copyAndDeleteKeys] start at key: " << start->first << endl;
+  cout << "[treeNode::copyAndDeleteKeys] start at key: " << start->first << endl;
   
   map<int, double>::iterator targetCopy = start;
   if(!isLeaf) {
@@ -200,7 +200,7 @@ int treeNode::copyAndDeleteKeys(
 
 int treeNode::copyAndDeleteChilds(
   treeNode *newNode, vector<treeNode*>::iterator start, vector<treeNode*>::iterator end) {
-  // cout << "[treeNode::copyAndDeleteChilds] start copy and delete childs" << endl;
+  cout << "[treeNode::copyAndDeleteChilds] start copy and delete childs" << endl;
   
   vector<treeNode*>& newChildPointer = newNode->getChildPointers(); 
   try {
@@ -224,7 +224,7 @@ int treeNode::copyAndDeleteChilds(
  * @return treeNode* deficient node or NULL
  */
 bool treeNode::deleteLeafNode(int key) {
-  // cout << "[treeNode::deleteLeafNode] delete in leaf, key: " << key << endl;
+  cout << "[treeNode::deleteLeafNode] delete in leaf, key: " << key << endl;
   for(auto it=keyPairs.begin(); it!=keyPairs.end(); it++) {
     if(it->first == key) {
       // find key -> erase
@@ -237,7 +237,7 @@ bool treeNode::deleteLeafNode(int key) {
     return false;
   }
 
-  // cout << "[treeNode::deleteLeafNode] after deletion, LEAF node is DEFICIENT" << endl;
+  cout << "[treeNode::deleteLeafNode] after deletion, LEAF node is DEFICIENT" << endl;
   return true;
 }
 
