@@ -457,7 +457,7 @@ bool bPlusTree::borrowFromLeaf(treeNode* parent, treeNode* deficient) {
     keyIndex = distance(parent->getChildPointers().begin(), targetNodeIt) - 1;
     adjustKey = next(adjustKey, keyIndex);
     parent->getKeyPairs().erase(adjustKey->first);
-    pair<int, double> newKey = {targetNode->getKeyPairs().begin()->first, targetNode->getKeyPairs().begin()->second};
+    pair<int, double> newKey = {targetNode->getKeyPairs().begin()->first, 0};
     parent->getKeyPairs().insert(newKey);
   }
 

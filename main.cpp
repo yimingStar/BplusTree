@@ -56,7 +56,14 @@ vector<string> splitCmd(string line) {
 int main(int argc, char** argv) {
   // check input name is in agrv
   if(argc < 2) {
-    // cout << "[ERROR] missing input file" << endl;
+    // go test case
+    bPlusTree t(10);
+    for(int i=0; i<10000; i++) {
+      t.insertion(i,i);
+    }
+    for(int i=0; i<10000; i++) {
+      t.deletion(i);
+    }
     return -1;
   }
 
