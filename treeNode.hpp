@@ -45,7 +45,6 @@ class treeNode {
     ); // insert new key-value into 'leaf' node
 
     std::map<int, double>::iterator getMiddleKey();
-    std::vector<treeNode*>::iterator getMiddleChild();
     int copyAndDeleteKeys(
       treeNode *newNode,
       std::map<int, double>::iterator start,

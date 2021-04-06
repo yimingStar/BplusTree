@@ -35,17 +35,17 @@ treeNode::treeNode(int treeDegree, int key, double value, bool insert) {
   if(insert) keyPairs.insert({key, value});
 }
 
-treeNode* treeNode::searchIndexNode(int key) { 
-  assert(!isLeaf);
-  assert(childPointers.size() > 0); // failed if childPointers = 0
-  
+/**
+ * @brief TODO fix
+ * 
+ * @param key 
+ * @return treeNode* 
+ */
+treeNode* treeNode::searchIndexNode(int key) {
+  // cout << "[treeNode::searchIndexNode] with key: " << key << endl;
   map<int,double>::iterator targetkey = keyPairs.upper_bound(key);
   int k = distance(keyPairs.begin(), keyPairs.upper_bound(key));
-  
-  vector<treeNode*>::iterator childIdx = childPointers.begin(); 
-  childIdx = childIdx + k;
-  treeNode* targetChild = *childIdx;
-  return targetChild;
+  return childPointers[k];
 }
 
 /**
@@ -57,8 +57,6 @@ treeNode* treeNode::searchIndexNode(int key) {
  * @return pair<bool, double> 
  */
 pair<bool, double> treeNode::searchLeafNode(int key) {
-  assert(isLeaf);
-
   map<int,double>::iterator targetElement;
   targetElement = keyPairs.find(key);
   if(targetElement != keyPairs.end()) {
@@ -82,18 +80,19 @@ pair<int, treeNode*> treeNode::insertIndexNode(treeNode* targetNode, pair<int, d
     return {false, NULL};
   }
   // cout << "[treeNode::insertIndexNode] target insertion INSERT node is OVERFULL" << endl;
-  
+
   /**
    * @brief Create new indexNode
    *        this new node also will be return as the right child of middle key
    */
   treeNode *newIndexNode = new treeNode(targetNode->degree, 0, false);
   map<int, double>::iterator midIt = targetNode->getMiddleKey();
-  vector<treeNode*>::iterator midChild = targetNode -> getMiddleChild();
+  int k = distance(targetNode->keyPairs.begin(), midIt);
+  vector<treeNode*>::iterator midChild = targetNode->childPointers.begin();
+  advance(midChild, k+1);
 
   int midKey = midIt->first;
   // cout << "[treeNode::insertIndexNode] SPLIT INDEX node by key: " << midKey << endl;
-
   copyAndDeleteKeys(newIndexNode, midIt, targetNode->keyPairs.end());
   copyAndDeleteChilds(newIndexNode, midChild, targetNode->childPointers.end());
 
@@ -160,15 +159,6 @@ map<int, double>::iterator treeNode::getMiddleKey() {
   return midKey;
 }
 
-vector<treeNode*>::iterator treeNode::getMiddleChild() {
-  vector<treeNode*>::iterator midChild = childPointers.begin();
-  for (int mid=0; mid < childPointers.size()/2; mid++) {
-    midChild++;
-  }
-  // push middle key
-  return midChild;
-}
-
 /**
  * @brief if Node is LEAF -> middle nodes value must also stay in the right new leaf
  *        No need to consider child list
@@ -182,7 +172,8 @@ int treeNode::copyAndDeleteKeys(
   // cout << "[treeNode::copyAndDeleteKeys] start at key: " << start->first << endl;
   
   map<int, double>::iterator targetCopy = start;
-  if(!isLeaf) {
+  if(!isLeaf && start != end) {
+    // drop the middle key
     targetCopy = next(start);
   }
 
@@ -222,6 +213,13 @@ int treeNode::copyAndDeleteChilds(
  * @param key 
  * @param leafList 
  * @return treeNode* deficient node or NULL
+ */
+
+/**
+ * @brief TODO fix
+ * 
+ * @param key 
+ * @return treeNode* 
  */
 bool treeNode::deleteLeafNode(int key) {
   // cout << "[treeNode::deleteLeafNode] delete in leaf, key: " << key << endl;

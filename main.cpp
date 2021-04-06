@@ -57,13 +57,14 @@ int main(int argc, char** argv) {
   // check input name is in agrv
   if(argc < 2) {
     // go test case
-    bPlusTree t(10);
+    bPlusTree t(3);
     for(int i=0; i<10000; i++) {
       t.insertion(i,i);
     }
     for(int i=0; i<10000; i++) {
       t.deletion(i);
     }
+    t.printTree(t.getRoot());
     return -1;
   }
 

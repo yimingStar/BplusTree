@@ -1,0 +1,14 @@
+Initialize(3)
+Insert(10, 1)
+Insert(30, 3)
+Insert(40, 4)
+Insert(100, 10)
+Search(20)
+Search(1, 100)
+Search(10)
+Search(30)
+Delete(10);
+Delete(30);
+Delete(40);
+Delete(100);
+PrintTree()
