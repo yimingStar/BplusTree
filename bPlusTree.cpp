@@ -624,8 +624,8 @@ bool bPlusTree::combineWithLeaf(treeNode* parent, treeNode* deficient) {
     }
 
     // Free deficient node
-    delete deficient;
-    deficient = NULL; 
+    // delete deficient;
+    // deficient = NULL; 
   }
 
   return hasCombine;
