@@ -55,16 +55,16 @@ vector<string> splitCmd(string line) {
 
 int main(int argc, char** argv) {
   // check input name is in agrv
-  bPlusTree b(100);
-  for(int i=0; i<100000; i++) {
+  bPlusTree b(10);
+  for(int i=0; i<10000; i++) {
     b.insertion(i,i);
   }
-  for(int i=0; i<100000; i++) {
+  for(int i=0; i<100; i++) {
     b.deletion(i);
   }
-  b.printTree(b.getRoot());
+  // b.printTree(b.getRoot());
   // if(argc < 2) {
-  //   // cout << "[ERROR] missing input file" << endl;
+  //   cout << "[ERROR] missing input file" << endl;
   //   return -1;
   // }
 
