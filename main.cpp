@@ -55,30 +55,38 @@ vector<string> splitCmd(string line) {
 
 int main(int argc, char** argv) {
   // check input name is in agrv
-  if(argc < 2) {
-    // cout << "[ERROR] missing input file" << endl;
-    return -1;
+  bPlusTree b(100);
+  for(int i=0; i<100000; i++) {
+    b.insertion(i,i);
   }
+  for(int i=0; i<100000; i++) {
+    b.deletion(i);
+  }
+  b.printTree(b.getRoot());
+  // if(argc < 2) {
+  //   // cout << "[ERROR] missing input file" << endl;
+  //   return -1;
+  // }
 
-  string inputFileName = argv[1];
-  string line;
-  ifstream inputFile(inputFileName);
+  // string inputFileName = argv[1];
+  // string line;
+  // ifstream inputFile(inputFileName);
 
-  /**
-   * @brief redirect cout to output_file.txt!
-   */
-  std::ofstream out("output_file.txt");
-  std::cout.rdbuf(out.rdbuf()); 
+  // /**
+  //  * @brief redirect cout to output_file.txt!
+  //  */
+  // std::ofstream out("output_file.txt");
+  // std::cout.rdbuf(out.rdbuf()); 
 
-  static vector<string> splitResult;
-  bPlusTree *tree = new bPlusTree(); 
+  // static vector<string> splitResult;
+  // bPlusTree *tree = new bPlusTree(); 
 
-  if(inputFile.is_open()) {
-    while(getline(inputFile, line)) {
-      splitResult = splitCmd(line);
-      executeCmd(splitResult, tree);
-    }
-    inputFile.close();
-  } 
+  // if(inputFile.is_open()) {
+  //   while(getline(inputFile, line)) {
+  //     splitResult = splitCmd(line);
+  //     executeCmd(splitResult, tree);
+  //   }
+  //   inputFile.close();
+  // } 
   return 0;
 }
