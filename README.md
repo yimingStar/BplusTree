@@ -8,26 +8,31 @@
 
 ## Category
   * [A. Introduction](#a-introduction)
+      * [<em><strong>1. Run this program</strong></em>](#1-run-this-program)
+      * [<em><strong>2. File structures</strong></em>](#2-file-structures)
   * [B. Functions ProtoTypes and Descriptions](#b-functions-prototypes-and-descriptions)
       * [<em><strong>bPlusTree</strong></em>](#bplustree)
         * [1. Construct Tree and assigning property parameters.](#1-construct-tree-and-assigning-property-parameters)
-        * [2. <a name="user-content-search_bplustree">Search operation</a>](#2-search-operation)
-        * [3. Insert operation](#3-insert-operation)
-        * [4. Delete operation](#4-delete-operation)
+        * [2. Search Operation](#2-search-operation)
+        * [3. Insert Operation](#3-insert-operation)
+        * [4. Delete Operation](#4-delete-operation)
+        * [5. Test Functions](#5-test-functions)
       * [<em><strong>treeNode</strong></em>](#treenode)
         * [6. Construct treeNode](#6-construct-treenode)
-        * [7. Search treeNode interiorly](#7-search-treenode-interiorly)
-        * [8. <a name="user-content-insert_treeNode">Insert Object into treeNode interiorly</a>](#8-insert-object-into-treenode-interiorly)
-        * [9. <a name="user-content-delete_treeNode">Delete Object from treeNode interiorly</a>](#9-delete-object-from-treenode-interiorly)
-  * [C. Design Details](#cdesign-details)
+        * [7. Search treeNode](#7-search-treenode)
+        * [8. Insert Object into treeNode](#8-insert-object-into-treenode)
+        * [9. Delete Object from treeNode](#9-delete-object-from-treenode)
+        * [10. Get Classes private variables](#10-get-classes-private-variables)
+        * [11. Test Function](#11-test-function)
+  * [C. Design Details](#c-design-details)
       * [<em><strong>bPlusTree</strong></em>](#bplustree-1)
         * [<em><strong>tracePath</strong></em>](#tracepath)
         * [<em><strong>leafList</strong></em>](#leaflist)
       * [<em><strong>treeNode</strong></em>](#treenode-1)
-        * [<a name="user-content-treeNode_keyPairs"><em><strong>keyPairs</strong></em></a>](#keypairs)
-        * [<a name="user-content-treeNode_childPointers"><em><strong>childPointers</strong></em></a>](#childpointers)
+        * [<em><strong>keyPairs</strong></em>](#keypairs)
+        * [<em><strong>childPointers</strong></em>](#childpointers)
   * [D. Appendix](#d-appendix)
-
+      * [<em><strong>Database management usage</strong></em>](#database-management-usage)
 ## A. Introduction
 
 ### ***1. Run this program***
@@ -78,7 +83,7 @@ This section show the functions input output parameters and simply describe how 
 | a | bPlusTree | int degree | None | tree constructure |
 | b | init | int degree | None | init tree parameters |
 
-#### 2. <a name="search_bplustree">Search operation</a>
+#### 2. Search Operation
 
 |   | Function Names | input | return | description |
 |---|------------- | ------------- | ----------- | ------- |
@@ -86,13 +91,13 @@ This section show the functions input output parameters and simply describe how 
 | b | search | int key | int success | output the value of the key |
 | c | searchRange | int start, int finish | int success | output the values in the range |
 
-#### 3. Insert operation
+#### 3. Insert Operation
 
 |   | Function Names | input | return | description |
 |---| ------------- | ------------- | ----------- | ------- |
 | a | insertion | int key, double value |int success| insert data {key, value} |
 
-  The progress of this function is using [***2-(a) searchLeaf***](#search_bplustree) to find the spot to insert the data. After the node insert [***8-(b) insertLeafNode)*** or ***8-(a) insertIndexNode***](#insert_treeNode), there might cause a node ***overfull***, a new sibling nod will be created (See detailed in 8.) which will trigger a propagation insert up to the upper level node. . To simplify the propagation. We shown the flow chart as below.
+  The progress of this function is using [***2-(a) searchLeaf***](#2-search-operation) to find the spot to insert the data. After the node insert [***8-(b) insertLeafNode)*** or ***8-(a) insertIndexNode***](#8-insert-object-into-treenode), there might cause a node ***overfull***, a new sibling nod will be created (See detailed in 8.) which will trigger a propagation insert up to the upper level node. . To simplify the propagation. We shown the flow chart as below.
 
   ```mermaid
   graph LR
@@ -104,7 +109,7 @@ This section show the functions input output parameters and simply describe how 
   As the flow char shown, the ***middle key*** will be ***insert*** into the parent. However, if the parent node is missing, parent node will have to be created. According to the overfull situation, the ***organize*** contains key and child pointers re-arrangement in the parent node. So, if the split node is INDEX node, we not only have to organize the key but also have to set some of the children pointer correctly. 
 
 
-#### 4. Delete operation
+#### 4. Delete Operation
 
 |   | Function Names | input | return | description |
 |---| ------------- | ------------- | ----------- | ------- |
@@ -115,8 +120,7 @@ This section show the functions input output parameters and simply describe how 
 | e | combineWithLeaf | treeNode* parent, treeNode* deficient | bool | combine with sibling leaf node |
 | f | getInvalidParentKeyIdx | treeNode* parent, iterator changNodeIt | int distance | return the deficient index location of the key and child |
 
-  Also using [***2-(a) searchLeaf***](#search_bplustree) to find the spot to delete the data. 
-  After the interior LEAF node delete [***9-(a) deleteLeafNode***](#delete_treeNode), the LEAF node might be  ***deficient***, which will trigger the a ***propagation process*** fixing the deficient node. The flow chart shows a brief of the fixing process.
+  Also using [***2-(a) searchLeaf***](#2-search-operation) to find the spot to delete the data. After the interior LEAF node delete [***9-(a) deleteLeafNode***](#9-delete-object-from-treenode), the LEAF node might be  ***deficient***, which will trigger the a ***propagation process*** fixing the deficient node. The flow chart shows a brief of the fixing process.
 
   ```mermaid
   graph LR
@@ -128,7 +132,7 @@ This section show the functions input output parameters and simply describe how 
 
   Most importantly, combining with sibling might cause the parent becoming deficient, the process might propogates from leaf to root.
 
-#### 5. Test functions
+#### 5. Test Functions
 
 |   | Function Names | input | return | description |
 |---| ------------- | ------------- | ----------- | ------- |
@@ -146,7 +150,7 @@ This section show the functions input output parameters and simply describe how 
 | b | treeNode | int degree, int key, double value, bool insert | None | construct LEAF node |
 
 
-#### 7. Search treeNode interiorly
+#### 7. Search treeNode
 
 |   | Function Names | input | return | description |
 |---| ------------- | ------------- | ----------- | ------- |
@@ -154,16 +158,15 @@ This section show the functions input output parameters and simply describe how 
 | b | searchLeafNode | int key | pair<bool, double> | return the data |
 
 
-#### 8. <a name="insert_treeNode">Insert Object into treeNode interiorly</a>
+#### 8. Insert Object into treeNode
 
 |   | Function Names | input | return | description |
 |---| ------------- | ------------- | ----------- | ----------- |
 | a | insertIndexNode | treeNode*, pair<int,double> | pair<int, treeNode*> | insert key into index node |
 | b | insertLeafNode | treeNode*, pair<int,double>, list<treeNode*> &leafList | pair<int, treeNode*> | insert key into leaf node |
 | c | getMiddleKey | None | map<int, double> | return the middle key-value after insert |
-| d | getMiddleChild | None | vector<treeNode*>::iterator | return the middle child pointer after insert |
-| e | copyAndDeleteKeys | treeNode *newNode, iterator start, iterator end | int success | split occurs, copy keys to new node, delete keys from old|
-| f | copyAndDeleteChilds | int key | int success | split occurs, copy childs to new node, delete childs from old|
+| d | copyAndDeleteKeys | treeNode *newNode, iterator start, iterator end | int success | split occurs, copy keys to new node, delete keys from old|
+| e | copyAndDeleteChilds | int key | int success | split occurs, copy childs to new node, delete childs from old|
 
   When split occurs, a new sibling node will be create. Then we copy the proper keys and childs to the new node, and remove them from the old node. 
 
@@ -174,7 +177,7 @@ This section show the functions input output parameters and simply describe how 
   B --> C[create sibling] --> C1[copyAndDelete] --> D[ return push key and new node]
   ```
 
-#### 9. <a name="delete_treeNode">Delete Object from treeNode interiorly</a>
+#### 9. Delete Object from treeNode
 
 |   | Function Names | input | return | description |
 |---| ------------- | ------------- | ----------- | ------- |
@@ -188,7 +191,7 @@ This section show the functions input output parameters and simply describe how 
 | b | getKeyPairs | None | map<int,double>& | return tree node's key-values |
 | c| getChildPointers | None | vector<treeNode*>& | return tree node's child pointers |
 
-#### 11. Test function
+#### 11. Test Function
 
 |   | Function Names | input | return | description |
 |---| -------------  | ------------- | ----------- | ------- |
@@ -210,8 +213,8 @@ class bPlusTree {
 }
 ```
 - ***degree=m*** - tree is an m-way B+ tree
-- ***minPairsSize*** - The minimum number of pairs for all nodes, which is $ceil \lceil m/2 \rceil - 1$
-- ****root*** - point to the root of the tree.
+- ***minPairsSize*** - The minimum number of pairs for all nodes, which is ***ceil(m/2) - 1***
+- \****root*** - point to the root of the tree.
 
 - #### ***tracePath***
   Use vector as stack, as we traverse down from root to leaf we push the nodes in the path into stack.
@@ -220,7 +223,7 @@ class bPlusTree {
   Use to construct double link list in the bottom of the tree.
 
 ### ***treeNode***
-In this part, the crucial decision is the data structure on using [***map*** for ***keyPairs***](#treeNode_keyPairs) and ***vector*** for childPointers.
+In this part, the crucial decision is the data structure on using ***map*** for ***keyPairs*** and ***vector*** for childPointers.
 ```
 class treeNode {
   private:
@@ -239,15 +242,15 @@ class treeNode {
 - ***maxPairsSize*** - The maximum number of pairs in the map keyPairs
 - ***minPairsSize*** - The minimum number of pairs in the map keyPairs
 
-- #### <a name="treeNode_keyPairs">***keyPairs***</a>
+- #### ***keyPairs***
   The reason to use map to store the the key-values
-  1. To make the insert key order up, the complexity will be only ***$logn$***
-  2. With N number insertions, the complexity will be $O(n)$
+  1. To make the insert key order up, the complexity will be only ***O(logn)***
+  2. With N number insertions, the complexity will be ***O(n)***
   
-  Since the map in C++ is build in red-black tree, this result will be better than other std containers insertions, which most of them need to be sort in $O(nlogn)$. 
+  Since the map in C++ is build in red-black tree, this result will be better than other std containers insertions, which most of them need to be sort in ***O(nlogn)***. 
   
-- #### <a name="treeNode_childPointers">***childPointers***</a>
-  Using vector is easily to insert and erase and acces, since we will often have to re-organize the child pointers.
+- #### ***childPointers***
+  Using vector is easily to insert and erase and access, since we will often have to re-organize the child pointers.
   
 ## D. Appendix
 ### ***Database management usage***

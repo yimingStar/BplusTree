@@ -92,7 +92,6 @@ int bPlusTree::search(int key) {
 }
 
 int bPlusTree::searchRange(int start, int finish) {
-  // cout << "[bPlusTree::searchRange] start: " << start << ", finish: " << finish << endl;
   treeNode *startLeaf = searchLeaf(start);
   if(startLeaf == NULL) {
     /**
@@ -112,7 +111,8 @@ int bPlusTree::searchRange(int start, int finish) {
       // get starting leaf, or leaf is in range
       isInRange = true;
       for(auto itKey=(*itLeaf)->getKeyPairs().begin(); itKey != (*itLeaf)->getKeyPairs().end(); itKey++) {
-        if(itKey->first < start || itKey->first > finish) {
+        if(itKey->first < start) continue;
+        if(itKey->first > finish) {
           // out of range
           stopSearching = true;
           break;
